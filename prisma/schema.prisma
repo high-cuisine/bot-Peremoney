@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int               @id @default(autoincrement())
+  telegramId  Int               @unique
+  username    String            @unique
+  role        UserRoles         @default(user)
+  rate        UserRate          @default(default)
+  lastAction  DateTime          @default(now())
+  firstAction DateTime          @default(now())
+  clients     UsersClients[]
+  estimation  UsersEstimation[]
+  questions   UsersQuestion[]
+
+  @@index([telegramId])
+  @@map("users")
+}
+
+model UsersQuestion {
+  id             Int     @id @default(autoincrement())
+  userId         Int
+  isTakingBonus  Boolean @default(false)
+  whatsABusiness String
+  conversion     String
+  about          String
+  CAC            Float
+  LTV            Float
+  user           User    @relation(fields: [userId], references: [id])
+
+  @@map("users_questions")
+}
+
+model UsersEstimation {
+  id         Int  @id @default(autoincrement())
+  userId     Int
+  estimation Int
+  user       User @relation(fields: [userId], references: [id])
+}
+
+model UsersClients {
+  id         Int    @id @default(autoincrement())
+  userId     Int
+  name       String
+  phone      String
+  email      String
+  telegramId BigInt
+  user       User   @relation(fields: [userId], references: [id])
+}
+
+enum UserRoles {
+  admin
+  moderator
+  user
+}
+
+enum UserRate {
+  default
+  standard
+  pro
+}
