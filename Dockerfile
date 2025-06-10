@@ -10,6 +10,9 @@ WORKDIR /app
 # Копируем все файлы проекта
 COPY . .
 
+# Показываем содержимое директории
+RUN ls -la
+
 # Устанавливаем зависимости с игнорированием peer-зависимостей
 RUN npm install --legacy-peer-deps --force
 
@@ -20,7 +23,10 @@ RUN npx prisma generate
 RUN npm run build
 
 # Проверяем содержимое dist директории
+RUN echo "=== Contents of dist directory ==="
 RUN ls -la dist/
+RUN echo "=== Contents of dist/src directory ==="
+RUN ls -la dist/src/
 
 # Финальный образ
 FROM node:20-alpine
@@ -38,7 +44,10 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
 # Проверяем содержимое dist директории
+RUN echo "=== Contents of dist directory in production ==="
 RUN ls -la dist/
+RUN echo "=== Contents of dist/src directory in production ==="
+RUN ls -la dist/src/
 
 # Экспонируем порт
 EXPOSE 3000
