@@ -1,13 +1,19 @@
 FROM node:20-alpine AS builder
 
+# Устанавливаем зависимости для сборки
 RUN apk add --no-cache openssl python3 make g++
 
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps --force
 COPY . .
+
+# Явно указываем команду сборки
 RUN npm run build
 RUN npx prisma generate
+
+# Проверяем наличие собранных файлов
+RUN ls -la dist/
 
 FROM node:20-alpine
 RUN apk add --no-cache openssl
@@ -18,9 +24,7 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
-# Добавляем healthcheck для мониторинга состояния
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD node -e "require('http').request('http://localhost:3000', {method: 'GET'}, (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).end()"
+# Проверяем структуру в финальном образе
+RUN ls -la dist/
 
-EXPOSE 3000
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
+EXP
