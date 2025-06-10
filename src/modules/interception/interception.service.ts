@@ -25,7 +25,12 @@ export class InterceptionService {
         return users;
     }
 
-    async 
+    async getLeads() {
+        const {users, leadsGeneration} = await this.usersService.getUsersByLeads();
+        const usersWithLeads = users.map(el => {
+            const leadGeneration = leadsGeneration.find(lead => lead.userId === el.id);
+            const leads = el.leads - (leadGeneration?.dailyCount || 0);
+        });
+    }   
 }
-
 // user : telegramId, leads: number, rate: 'default' | 'pro'
