@@ -7,17 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
   id          Int               @id @default(autoincrement())
-  telegramId  Int               @unique
+  telegramId  BigInt            @unique
   username    String            @unique
+  name        String            @default("")
+  phone       String            @default("")
   role        UserRoles         @default(user)
   rate        UserRate          @default(default)
   lastAction  DateTime          @default(now())
   firstAction DateTime          @default(now())
+  leads   Int                   @default(0)
+  isTakingFreeLeads Boolean     @default(false)
+  isBanned    Boolean           @default(false)
   clients     UsersClients[]
   estimation  UsersEstimation[]
   questions   UsersQuestion[]
+  competitors Competitors[]
 
   @@index([telegramId])
   @@map("users")
@@ -44,6 +51,15 @@ model UsersEstimation {
   user       User @relation(fields: [userId], references: [id])
 }
 
+model LeadGeneration {
+  id         Int  @id @default(autoincrement())
+  userId     Int
+  companyId  Int
+  maxCount   Int
+  dailyCount Int
+  
+}
+
 model UsersClients {
   id         Int    @id @default(autoincrement())
   userId     Int
@@ -54,6 +70,16 @@ model UsersClients {
   user       User   @relation(fields: [userId], references: [id])
 }
 
+model Competitors {
+   id         Int    @id @default(autoincrement())
+   userId     Int
+   webSite    String
+   phone      String
+
+   user           User    @relation(fields: [userId], references: [id])
+
+}
+
 enum UserRoles {
   admin
   moderator
@@ -62,6 +88,5 @@ enum UserRoles {
 
 enum UserRate {
   default
-  standard
   pro
 }

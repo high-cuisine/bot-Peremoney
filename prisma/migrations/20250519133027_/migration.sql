@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN     "leadsMini" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "leadsPro" INTEGER NOT NULL DEFAULT 0;

@@ -4,8 +4,278 @@
       "id": "1042650482:1042650482",
       "data": {
         "__scenes": {
+          "current": "sms_mailing",
+          "state": {}
+        },
+        "register": {
+          "step": "confirmation",
+          "name": "Александр",
+          "phone": "+79658879405",
+          "email": "ewfwe@EWF.R"
+        },
+        "LeadGenerationSession": {
+          "step": "name"
+        },
+        "lead_generation": {
+          "step": "sites"
+        },
+        "leadGeneration": {
+          "step": "launch",
+          "sites": [],
+          "numbers": [],
+          "time_period": "1_month",
+          "max_leads": 4,
+          "day_leads_limit": 4
+        },
+        "sendUserExelDeAnonymization": {
+          "step": "documentId",
+          "username": "high_cuisine"
+        },
+        "createUserbot": {
+          "step": "waiting_code",
+          "phone": "+79658879405",
+          "apiId": "9704329",
+          "apiHash": "dc73fb86db4d2e1db3b4b23b29fed49d",
+          "password": "goldenmaster2014"
+        },
+        "start_inviting": {
+          "step": "instructions"
+        },
+        "startInviting": {
+          "step": "excel_file",
+          "groupLink": "https://t.me/testchannel23325",
+          "groupId": "12"
+        },
+        "start_mailing": {
+          "step": "instructions"
+        },
+        "startMailing": {
+          "step": "excel_file",
+          "message": "ntcn"
+        },
+        "sms_mailing": {
+          "step": "instructions"
+        },
+        "smsMailing": {
+          "step": "excel_file",
+          "message": "test"
+        },
+        "setting_cabinet": {
+          "step": "company_name"
+        },
+        "cabinetSettings": {
+          "step": "confirm",
+          "sites": [
+            "seg1",
+            "set",
+            "2"
+          ],
+          "numbers": [
+            "89658879405",
+            "89658879405"
+          ],
+          "company_name": "ds",
+          "contact_person": "we",
+          "phone": "w",
+          "email": "w",
+          "website": "w",
+          "address": "w",
+          "description": "w"
+        }
+      }
+    },
+    {
+      "id": "-1002623837134:1042650482",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "7171405334:7171405334",
+      "data": {
+        "__scenes": {},
+        "register": {
+          "step": "confirmation",
+          "name": "Maksim",
+          "phone": "+79658879405"
+        },
+        "lead_generation": {
+          "step": "sites"
+        },
+        "leadGeneration": {
+          "step": "launch",
+          "sites": [
+            "ght",
+            "ght"
+          ],
+          "numbers": [
+            "1",
+            "1",
+            "2"
+          ],
+          "time_period": "1_day",
+          "max_leads": 60,
+          "day_leads_limit": 100
+        }
+      }
+    },
+    {
+      "id": "6643926869:6643926869",
+      "data": {
+        "__scenes": {
           "current": "register",
           "state": {}
+        },
+        "register": {
+          "step": "email",
+          "name": "Анастасия",
+          "phone": "+79874263657"
+        }
+      }
+    },
+    {
+      "id": "400454435:400454435",
+      "data": {
+        "__scenes": {},
+        "register": {
+          "step": "confirmation",
+          "name": "Арсений",
+          "phone": "+79094374372",
+          "email": "arseniy.rnd@gmail.com"
+        }
+      }
+    },
+    {
+      "id": "1456270602:1456270602",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "147726025:147726025",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "6391075282:6391075282",
+      "data": {
+        "__scenes": {},
+        "register": {
+          "step": "confirmation",
+          "name": "Марина",
+          "phone": "+79286610576",
+          "email": "bag1402@gmail.com"
+        }
+      }
+    },
+    {
+      "id": "641554928:641554928",
+      "data": {
+        "__scenes": {
+          "current": "register",
+          "state": {}
+        },
+        "register": {
+          "step": "name"
+        }
+      }
+    },
+    {
+      "id": "7933582066:7933582066",
+      "data": {
+        "__scenes": {
+          "current": "register",
+          "state": {}
+        },
+        "register": {
+          "step": "confirmation",
+          "name": "Армен",
+          "phone": "+79181999313",
+          "email": "aastepanan@mail.ru"
+        }
+      }
+    },
+    {
+      "id": "635422546:635422546",
+      "data": {
+        "__scenes": {
+          "current": "register",
+          "state": {}
+        },
+        "register": {
+          "step": "name"
+        }
+      }
+    },
+    {
+      "id": "8012025364:8012025364",
+      "data": {
+        "__scenes": {},
+        "register": {
+          "step": "confirmation",
+          "name": "Александр",
+          "phone": "+79109051668",
+          "email": "smam_1@rambler.ru"
+        }
+      }
+    },
+    {
+      "id": "6711792303:6711792303",
+      "data": {
+        "__scenes": {},
+        "register": {
+          "step": "confirmation",
+          "name": "Николай",
+          "phone": "+79152424504",
+          "email": "Snick-2001@yandex.ru"
+        }
+      }
+    },
+    {
+      "id": "294491074:294491074",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "-1002307347432:1042650482",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "-1002688359039:6711792303",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "5315398537:5315398537",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "5627223228:5627223228",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "847720042:847720042",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "5084658344:5084658344",
+      "data": {
+        "__scenes": {},
+        "register": {
+          "step": "confirmation",
+          "name": "Светлана",
+          "phone": "+79110845618"
         }
       }
     }

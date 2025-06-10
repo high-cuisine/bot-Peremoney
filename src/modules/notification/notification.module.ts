@@ -9,5 +9,6 @@ import { TelegramBotModule } from '../telegram-bot/telegram-bot.module';
     TelegramBotModule
   ],
   providers: [NotifyService],
+  
 })
 export class NotifyModule {}

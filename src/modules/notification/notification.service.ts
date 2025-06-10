@@ -15,8 +15,8 @@ export class NotifyService {
 
     async sendUnActiveUsers() {
         const users = await this.userService.getUsers();
-        users.map( async (el:User) => {
-            if(Number(el.lastAction) - Number(el.firstAction) > 24 * 7 * 3600 * 1000) {
+        users.map( async (el:any) => {
+            if(Number(el.lastAction) - Date.now() > 24 * 7 * 3600 * 1000) {
                 await this.telegramService.sendMessage(el.telegramId, 'сообщение о то неактивности')
             }
         });
@@ -24,8 +24,27 @@ export class NotifyService {
         
     }
 
-    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: 'Europe/Amsterdam' })
+    async sendQualitySurvey() {
+        const users = await this.userService.getUsers();
+        users.map( async (el:any) => {
+            if(Number(el.lastAction) - Date.now() > 24 * 7 * 3600 * 1000) {
+                await this.telegramService.sendMessage(el.telegramId, 'сообщение о то неактивности')
+            }
+        });
+    }
+
+    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: 'Europe/Moscow' })
     handleCron() {
+        return this.sendUnActiveUsers();
+    }
+
+    @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT, { timeZone: 'Europe/Moscow' })
+    qualitySurvey() {
+        return this.sendUnActiveUsers();
+    }
+
+    @Cron(CronExpression.EVERY_DAY_AT_10PM, { timeZone: 'Europe/Moscow' })
+    sendNewLids() {
         return this.sendUnActiveUsers();
     }
 }
