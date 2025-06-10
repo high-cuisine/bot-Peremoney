@@ -1,48 +1,44 @@
-# Build stage
+# Используем Node.js 20 (LTS)
 FROM node:20-alpine AS builder
 
+# Устанавливаем зависимости для сборки (включая Python)
+RUN apk add --no-cache openssl python3 make g++
+
+# Создаем рабочую директорию
 WORKDIR /app
 
-# Install Python and build tools
-RUN apk add --no-cache python3 make g++
+# Копируем файлы зависимостей
+COPY package.json package-lock.json ./
 
-# Copy package files
-COPY package*.json ./
-COPY prisma ./prisma/
+# Устанавливаем зависимости с игнорированием peer-зависимостей
+RUN npm install --legacy-peer-deps --force
 
-# Install dependencies
-RUN npm ci
-
-# Copy source code
+# Копируем остальные файлы проекта
 COPY . .
 
-# Build application
-RUN npm run build
-
-# Production stage
-FROM node:20-alpine
-
-WORKDIR /app
-
-# Install Python and build tools in production stage too
-RUN apk add --no-cache python3 make g++
-
-# Copy package files
-COPY package*.json ./
-COPY prisma ./prisma/
-
-# Install ALL dependencies (including dev dependencies) since we're using start:dev
-RUN npm ci
-
-# Copy built application from builder stage
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-
-# Generate Prisma client
+# Генерируем Prisma клиент
 RUN npx prisma generate
 
-# Expose port
+# Собираем приложение
+RUN npm run build
+
+# Финальный образ
+FROM node:20-alpine
+
+# Устанавливаем зависимости для Prisma
+RUN apk add --no-cache openssl
+
+# Создаем рабочую директорию
+WORKDIR /app
+
+# Копируем только необходимое из builder
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+
+# Экспонируем порт
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "run", "start:dev"] 
+# Запускаем миграции и приложение
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]
