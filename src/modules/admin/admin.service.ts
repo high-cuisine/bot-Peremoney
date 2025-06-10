@@ -1,5 +1,4 @@
 import { Injectable, forwardRef, Inject } from '@nestjs/common';
-import { PrismaService } from '../../core/prisma/prisma.service';
 import { TelegramBotService } from '../telegram-bot/telegram-bot.service';
 import { UsersService } from '../users/users.service';
 import { User } from 'generated/prisma';
