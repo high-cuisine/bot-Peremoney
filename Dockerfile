@@ -22,12 +22,6 @@ RUN npx prisma generate
 # Собираем приложение
 RUN npm run build
 
-# Проверяем содержимое dist директории
-RUN echo "=== Contents of dist directory ==="
-RUN ls -la dist/
-RUN echo "=== Contents of dist/src directory ==="
-RUN ls -la dist/src/
-
 # Финальный образ
 FROM node:20-alpine
 
@@ -43,11 +37,6 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
-# Проверяем содержимое dist директории
-RUN echo "=== Contents of dist directory in production ==="
-RUN ls -la dist/
-RUN echo "=== Contents of dist/src directory in production ==="
-RUN ls -la dist/src/
 
 # Экспонируем порт
 EXPOSE 3000
