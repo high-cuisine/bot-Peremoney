@@ -1,44 +1,26 @@
-# Используем Node.js 20 (LTS)
 FROM node:20-alpine AS builder
 
-# Устанавливаем зависимости для сборки (включая Python)
 RUN apk add --no-cache openssl python3 make g++
 
-# Создаем рабочую директорию
 WORKDIR /app
-
-# Копируем файлы зависимостей
 COPY package.json package-lock.json ./
-
-# Устанавливаем зависимости с игнорированием peer-зависимостей
 RUN npm install --legacy-peer-deps --force
-
-# Копируем остальные файлы проекта
 COPY . .
-
-# Генерируем Prisma клиент
+RUN npm run build
 RUN npx prisma generate
 
-# Собираем приложение
-RUN npm run build
-
-# Финальный образ
 FROM node:20-alpine
-
-# Устанавливаем зависимости для Prisma
 RUN apk add --no-cache openssl
-
-# Создаем рабочую директорию
 WORKDIR /app
 
-# Копируем только необходимое из builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
-# Экспонируем порт
-EXPOSE 3000
+# Добавляем healthcheck для мониторинга состояния
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD node -e "require('http').request('http://localhost:3000', {method: 'GET'}, (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).end()"
 
-# Запускаем миграции и приложение
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]
+EXPOSE 3000
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
