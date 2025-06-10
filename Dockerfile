@@ -7,20 +7,20 @@ RUN apk add --no-cache openssl python3 make g++
 # Создаем рабочую директорию
 WORKDIR /app
 
-# Копируем файлы зависимостей
-COPY package.json package-lock.json ./
+# Копируем все файлы проекта
+COPY . .
 
 # Устанавливаем зависимости с игнорированием peer-зависимостей
 RUN npm install --legacy-peer-deps --force
-
-# Копируем остальные файлы проекта
-COPY . .
 
 # Генерируем Prisma клиент
 RUN npx prisma generate
 
 # Собираем приложение
 RUN npm run build
+
+# Проверяем содержимое dist директории
+RUN ls -la dist/
 
 # Финальный образ
 FROM node:20-alpine
@@ -36,6 +36,9 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+
+# Проверяем содержимое dist директории
+RUN ls -la dist/
 
 # Экспонируем порт
 EXPOSE 3000
