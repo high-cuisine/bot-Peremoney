@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install Python and build tools
+RUN apk add --no-cache python3 make g++
+
 # Copy package files
 COPY package*.json ./
 COPY prisma ./prisma/
@@ -20,6 +23,9 @@ RUN npm run build
 FROM node:20-alpine
 
 WORKDIR /app
+
+# Install Python and build tools in production stage too
+RUN apk add --no-cache python3 make g++
 
 # Copy package files
 COPY package*.json ./
