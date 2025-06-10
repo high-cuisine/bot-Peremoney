@@ -25,8 +25,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install production dependencies only
-RUN npm ci --only=production
+# Install ALL dependencies (including dev dependencies) since we're using start:dev
+RUN npm ci
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
@@ -39,5 +39,4 @@ RUN npx prisma generate
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "run", "build"] 
 CMD ["npm", "run", "start:dev"] 
