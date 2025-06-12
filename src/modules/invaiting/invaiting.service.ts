@@ -3,7 +3,7 @@ import { TelegramBotService } from '../telegram-bot/telegram-bot.service';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf, Context } from 'telegraf';
 import { UserBotsService } from 'src/user-bots/user-bots.service';
-import { PrismaService } from '../../core/prisma/prisma.service';
+import { PrismaService } from '../../core/prisma/Prisma.service';
 
 @Injectable()
 export class MailingService {
