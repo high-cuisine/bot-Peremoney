@@ -1,24 +1,23 @@
-import { Body, Controller, Post, Logger } from '@nestjs/common';
+import { Body, Controller, Post, Logger, Req } from '@nestjs/common';
 
 @Controller('webhook')
 export class WebhookController {
   private readonly logger = new Logger(WebhookController.name);
 
   @Post('')
-  async webhook(@Body() body: any) {
+  async webhook(@Body() body: any, @Req() req: Request) {
     // Для postback из Zvonok нужно использовать req.query, но вдруг они шлют body (перестраховка)
-    const ctPhone = body?.ct_phone;
-    const ctStatus = body?.ct_status;
-    const ctDuration = body?.ct_duration;
-    const ctCallId = body?.ct_call_id;
+    const phone = req.params.phone;
+    const company = req.params.company;
+    const status = req.params.status;;
 
-    if (!ctPhone) {
+    if (!phone) {
       this.logger.warn('Получен postback без номера телефона:', body);
       return;
     }
 
-    this.logger.log(`📞 Новый postback от номера: ${ctPhone}`);
-    this.logger.log(`ℹ️  Статус: ${ctStatus}, Длительность: ${ctDuration}, ID звонка: ${ctCallId}`);
+    this.logger.log(`📞 Новый postback от номера: ${phone}`);
+    this.logger.log(`ℹ️  Статус: ${status}, , ID звонка: ${company}`);
     this.logger.log(body);
 
     // Дополнительно: можно здесь вызывать сервис для сохранения в БД или триггера
