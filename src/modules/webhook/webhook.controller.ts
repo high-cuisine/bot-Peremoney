@@ -19,7 +19,7 @@ export class WebhookController {
 
     this.logger.log(`📞 Новый postback от номера: ${ctPhone}`);
     this.logger.log(`ℹ️  Статус: ${ctStatus}, Длительность: ${ctDuration}, ID звонка: ${ctCallId}`);
-    console.log(body);
+    this.logger.log(body);
 
     // Дополнительно: можно здесь вызывать сервис для сохранения в БД или триггера
 
