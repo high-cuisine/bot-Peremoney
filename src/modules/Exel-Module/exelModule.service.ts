@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/core/prisma/Prisma.service';
 import * as ExcelJS from 'exceljs';
-import { PHONE_EXAMPLE, EMAIL_EXAMPLE, TELEGRAM_ID_EXAMPLE } from './constant/exelData'
+import { PHONE_EXAMPLE, EMAIL_EXAMPLE, TELEGRAM_ID_EXAMPLE, TELEGRAM_USERNAME } from './constant/exelData'
 import { UsersClients } from 'generated/prisma';
 
 @Injectable()
@@ -24,7 +24,8 @@ export class ExelService {
         let phoneIndex = Infinity;
         let emailIndex = Infinity;
         let telegramIndex = Infinity;
-
+        let telegramUsernameIndex = Infinity;
+        
         const usersData:UsersDTO[] = [];
 
         data[0].map((exelItem, index) => {
@@ -39,6 +40,10 @@ export class ExelService {
             if(TELEGRAM_ID_EXAMPLE.includes(exelItem)) {
                 telegramIndex = index;
             }
+
+            if(TELEGRAM_USERNAME.includes(exelItem)) {
+                telegramUsernameIndex = index;
+            }
         });
 
         data.slice(1).map(el => {
@@ -47,7 +52,7 @@ export class ExelService {
                 userId,
                 phone: phoneIndex !== Infinity ? el[phoneIndex] : 0,
                 email: emailIndex !== Infinity ? el[emailIndex] : '',
-                name: ''
+                name: telegramUsernameIndex !== Infinity ? el[telegramUsernameIndex] : ''
             }
 
             usersData.push(usersItem);
@@ -56,7 +61,7 @@ export class ExelService {
         return usersData;
     }
 
-    async  exportToExcelBuffer(data:UsersClients[]) {
+    async  exportToExcelBuffer(data:any[]) {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Данные');
 
@@ -69,5 +74,25 @@ export class ExelService {
 
         const buffer = await workbook.xlsx.writeBuffer();
         return buffer;
+    }
+
+    async readExelByOneColumn(buffer: Buffer):Promise<string[]> {
+        console.log('work');
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer as any);   
+
+        const worksheet = workbook.worksheets[0];
+        const data: any[] = [];
+        worksheet.eachRow((row) => {
+            data.push(row.values);
+        });
+
+        console.log(data);
+
+        const res = data.map(el => String(el[1]));
+
+        console.log(res);
+
+        return res;
     }
 }

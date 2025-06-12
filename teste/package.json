@@ -1,0 +1,9 @@
+{
+  "name": "nowpayments-test",
+  "version": "1.0.0",
+  "dependencies": {
+    "input": "^1.0.1",
+    "nowpayments-api": "latest",
+    "telegram": "^2.26.22"
+  }
+}

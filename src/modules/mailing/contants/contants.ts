@@ -1,0 +1,1 @@
+export const MAILING_START_URL = `https://${process.env.SMS_EMAIL}:${process.env.SMS_API_KEY}@gate.smsaero.ru/v2/sms/send?`
