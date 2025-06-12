@@ -63,7 +63,7 @@ export class OrdersService {
 
     async notifyUserByCompany(companyPhone:string, status:string, phone:string) {
         //if(status !== 'compl_finished') return;
-
+        console.log(companyPhone, status, phone, 'уведомление');
         const leadGeneration = await this.prisma.leadGeneration.findFirst({
             where: {
                 companyNameForCalling:companyPhone
