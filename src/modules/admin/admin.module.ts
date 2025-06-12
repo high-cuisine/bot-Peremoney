@@ -10,7 +10,7 @@ import { RedisModuleCustom } from 'src/core/redis/redis.module';
 
 @Module({
   imports: [
-    UsersModule,
+    forwardRef(() => UsersModule),
     forwardRef(() => TelegramBotModule),
     AnonymizationModule,
     UserBotsModule,

@@ -40,7 +40,7 @@ const session = new LocalSession()
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    UsersModule, 
+    forwardRef(() => UsersModule), 
     ExelModule,
     UserBotsModule,
     RedisModuleCustom,
