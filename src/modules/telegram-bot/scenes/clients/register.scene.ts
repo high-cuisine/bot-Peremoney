@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common'
-import { Action, Ctx, Scene, SceneEnter, On, Command } from 'nestjs-telegraf'
+import { Action, Ctx, Scene, SceneEnter, On, Command, Hears } from 'nestjs-telegraf'
 import { AdminService } from 'src/modules/admin/admin.service'
 import { Markup } from 'telegraf'
 import { SceneContext } from 'telegraf/typings/scenes'
+import { BotMessages } from '../../messages/messages'
+import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper'
 
 //import { BotMessage, getTelegramMessage } from 'src/util/bot_messages'
 
@@ -23,11 +25,17 @@ export class RegisterScene {
     await ctx.replyWithHTML(
       'Добро пожаловать в процесс регистрации! 👋\n\nПожалуйста, введите ваше имя:'
     )
+    await addCancelButton(ctx)
   }
 
   @On('text')
   async onMessage(@Ctx() ctx: SceneContext) {
-   
+    const text = (ctx.message as any).text
+    
+    if (await handleCancelButton(ctx, text)) {
+      return
+    }
+
     if (!ctx.scene || ctx.scene.current.id !== 'register') {
       return
     }
@@ -37,8 +45,6 @@ export class RegisterScene {
       await ctx.scene.leave()
       return
     }
-
-    const text = ctx.message['text']
 
     switch (session.step) {
       case 'name':

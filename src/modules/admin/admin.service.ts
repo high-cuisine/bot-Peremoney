@@ -56,14 +56,15 @@ export class AdminService {
             Пользователь: ${userName}
             Ссылка на пользователя: ${userLink}
         `;
-        const managers = await this.usersService.getUsersByRole('moderator');
-
+        let managers = await this.usersService.getUsersByRole('moderator');
         if (managers.length === 0) {
-            return;
+            managers = await this.usersService.getUsersByRole('admin');
+            if(managers.length === 0) {
+                return;
+            }
         }
 
         const randomManager = managers[Math.floor(Math.random() * managers.length)];
-
         await this.telegramBotService.sendMessage(Number(randomManager.telegramId), adminMessage);
 
     }
@@ -178,35 +179,32 @@ export class AdminService {
             action: admin_inviting_order:${user.telegramId}}
         `
 
-        await this.redisService.set(`admin_inviting_order:${user.id}`, JSON.stringify({
+        const data = JSON.stringify({
             usernames: usernames,
             message: message,
             user: user.id,
             leads: usernames,
             status: 'pending'
-        }));
+        })
 
         console.log(`admin_inviting_order:${user.id}`);
 
-        await this.telegramBotService.sendMessageWithButtonAction(Number(manager.telegramId), messageAdmin, 'Принять', `admin_accept_mailing:${user.id}`);
-        
+        //await this.telegramBotService.sendMessageWithButtonAction(Number(manager.telegramId), messageAdmin, 'Принять', `admin_accept_mailing:${user.id}`);
+        await this.acceptMailing(user.username, Number(manager.telegramId), data)
     }
 
-    async acceptMailing(username:string, ctx:Context) {
-        const data = await this.redisService.get(`admin_inviting_order:${username}`);
-        console.log(data, `admin_inviting_order:${username}`);
-
-        if(!data) {
-            return;
-        }
+    async acceptMailing(username:string, telegramId:number, data:any) {
+        
 
         const mailingData = JSON.parse(data);
+        
+        console.log('startx')
 
         await this.userBotsService.createMailing(mailingData.usernames, mailingData.message);
 
         await this.redisService.del(`admin_inviting_order:${username}`);
 
-        await ctx.reply('Заявка на рассылку принята');
+        await this.telegramBotService.sendMessage(telegramId, 'Заявка на рассылку принята');
 
     }
 
@@ -216,7 +214,7 @@ export class AdminService {
         if(!manager) {
             return;
         }
-
+ 
         await this.telegramBotService.sendMessage(Number(manager.telegramId), message);
     }
 

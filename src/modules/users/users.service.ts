@@ -131,7 +131,7 @@ export class UsersService {
         if(!user) {
             return;
         }
-        await this.prisma.competitors.create({data: {userId: user.id, webSite: webSite, phone: phone}});
+        return await this.prisma.competitors.create({data: {userId: user.id, webSite: webSite, phone: phone}});
     }
 
     async getCompetitors(telegramId:number) {
@@ -161,6 +161,19 @@ export class UsersService {
 
     async updateUser(username:string, data:any) {
         await this.prisma.user.update({where: {username}, data})
+    }
+
+    async getAllUsers() {
+        const users = await this.prisma.user.findMany()
+        return users;
+    }
+
+    async saveUserCRM(telegramId:number, apiKey:string, crmType:'amo' | 'bitrix') {
+        const user = await this.prisma.user.findFirst({where: {telegramId}})
+        if(!user) {
+            return;
+        }
+        await this.prisma.userCRM.create({data: {userId: user.id, apiKey, crmType}})
     }
 }
 

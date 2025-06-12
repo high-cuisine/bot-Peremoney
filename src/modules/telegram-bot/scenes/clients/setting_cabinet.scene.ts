@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Ctx, Scene, SceneEnter, On, Command } from 'nestjs-telegraf';
+import { Ctx, Scene, SceneEnter, On, Command, Hears } from 'nestjs-telegraf';
+import { AdminService } from 'src/modules/admin/admin.service';
 import { Markup } from 'telegraf';
 import { SceneContext } from 'telegraf/typings/scenes';
+import { BotMessages } from '../../messages/messages';
+import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper';
 
 interface CabinetSettingsSession {
   step: 'company_name' | 'contact_person' | 'phone' | 'email' | 'website' | 'address' | 'description' | 'confirm';
@@ -33,12 +36,17 @@ export class SettingCabinetScene {
         [Markup.button.callback('Пропустить', 'skip_company_name')]
       ])
     );
+    await addCancelButton(ctx);
   }
 
   @On('text')
   async onText(@Ctx() ctx: SceneContext) {
     const session = ctx.session['cabinetSettings'] as CabinetSettingsSession;
     const text = (ctx.message as any).text;
+
+    if (await handleCancelButton(ctx, text)) {
+      return;
+    }
 
     switch (session.step) {
       case 'company_name':

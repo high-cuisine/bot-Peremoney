@@ -4,12 +4,13 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { BannedService } from './banned.service';
 import { RedisModuleCustom } from 'src/core/redis/redis.module';
+import { OrdersService } from './orders.service';
 
 @Module({
     imports:[PrismaModule, RedisModuleCustom],
-    providers: [UsersService, BannedService],
+    providers: [UsersService, BannedService, OrdersService],
     controllers: [UsersController],
-    exports:[UsersService]
+    exports:[UsersService, BannedService, OrdersService]
 })
 export class UsersModule {}
  

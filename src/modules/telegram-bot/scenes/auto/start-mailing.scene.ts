@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Ctx, Scene, SceneEnter, On, Command } from 'nestjs-telegraf';
+import { Ctx, Scene, SceneEnter, On, Command, Hears } from 'nestjs-telegraf';
 import { Markup } from 'telegraf';
 import { SceneContext } from 'telegraf/typings/scenes';
 import { AdminService } from 'src/modules/admin/admin.service';
 import { ExelService } from 'src/modules/Exel-Module/exelModule.service';
+import { BotMessages } from '../../messages/messages';
+import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper';
 
 interface StartMailingSession {
   step: 'instructions' | 'message' | 'excel_file';
@@ -35,6 +37,7 @@ export class StartMailingScene {
       '3. Юзернеймы должны быть указаны без символа @\n\n' +
       'Теперь, пожалуйста, отправьте сообщение для рассылки:'
     );
+    await addCancelButton(ctx);
   }
 
   @On('text')
@@ -45,6 +48,10 @@ export class StartMailingScene {
     
     const session = ctx.session['startMailing'] as StartMailingSession;
     const text = (ctx.message as any).text;
+
+    if (await handleCancelButton(ctx, text)) {
+      return;
+    }
 
     switch (session.step) {
       case 'instructions':
@@ -75,7 +82,7 @@ export class StartMailingScene {
       }
 
       // Здесь будет ваша бизнес-логика обработки файла
-      await ctx.reply('Файл получен! Заявка на рассылку создана');
+      await ctx.reply('Файл получен! Рассылка создана');
 
       const fileLink = await ctx.telegram.getFileLink(document.file_id);
       const response = await fetch(fileLink);
@@ -84,6 +91,8 @@ export class StartMailingScene {
       const leadsData = await this.exelService.readExcel(Buffer.from(buffer), ctx.from.id);
 
       const userNames = leadsData.map(lead => lead.name);
+
+      console.log(userNames, session.message, ctx.from.username);
 
       await this.adminService.sendAdminMailingOrder(userNames, session.message, ctx.from.username);
       await ctx.scene.leave();

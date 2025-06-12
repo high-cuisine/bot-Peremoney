@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { Action, Command, Ctx, Scene, SceneEnter, On } from 'nestjs-telegraf'
+import { Action, Command, Ctx, Scene, SceneEnter, On, Hears } from 'nestjs-telegraf'
 import { Markup } from 'telegraf'
 import { SceneContext } from 'telegraf/typings/scenes'
 import { BotMessages } from '../../messages/messages'
 import { UsersService } from '../../../users/users.service'
 import { AdminService } from '../../../admin/admin.service'
+import { OrdersService } from 'src/modules/users/orders.service'
+import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper'
 
 //import { BotMessage, getTelegramMessage } from 'src/util/bot_messages'
 
@@ -22,7 +24,8 @@ interface LeadGenerationSession {
 export class LeadGenerationScene {
   constructor(
     private readonly usersService: UsersService,
-    private readonly adminService: AdminService
+    private readonly adminService: AdminService,
+    private readonly ordersService: OrdersService
   ) {}
 
   @SceneEnter()
@@ -39,6 +42,7 @@ export class LeadGenerationScene {
     ctx.session['leadGeneration'] = {
       step: 'sites'
     };
+    await addCancelButton(ctx);
   }
 
   @Action('skip_sites')
@@ -73,18 +77,22 @@ export class LeadGenerationScene {
 
   @On('text')
   async onText(@Ctx() ctx: SceneContext) {
+    const text = (ctx.message as any).text;
+    
+    if (await handleCancelButton(ctx, text)) {
+      return;
+    }
+
     const session = ctx.session['leadGeneration'] as LeadGenerationSession;
-    const message = ctx.message as any;
-    const text = message.text;
 
     console.log(session.step);
 
     switch (session.step) {
       case 'sites':
         console.log(text);
-        session.sites = text.split(',').map(site => site.trim()).filter(site => site);
+        session.sites = text.split('\n').map(site => site.trim()).filter(site => site);
         session.step = 'numbers';
-        await ctx.reply('Введите список номеров телефонов через запятую:', {
+        await ctx.reply('Введите список номеров телефонов (каждый с новой строки):', {
           reply_markup: {
             inline_keyboard: [
               [{ text: BotMessages.leadGeneration.buttons.skip, callback_data: 'skip_numbers' }]
@@ -94,7 +102,7 @@ export class LeadGenerationScene {
         break;
 
       case 'numbers':
-        session.numbers = text.split(',').map(number => number.trim()).filter(number => number);
+        session.numbers = text.split('\n').map(number => number.trim()).filter(number => number);
         session.step = 'offer';
         await ctx.reply(BotMessages.leadGeneration.offerAgreement, {
           reply_markup: {
@@ -119,8 +127,8 @@ export class LeadGenerationScene {
             inline_keyboard: [
               [
                 { text: BotMessages.leadGeneration.buttons.back, callback_data: 'back_to_limits' },
-                { text: BotMessages.leadGeneration.buttons.launch, callback_data: 'launch_generation' }
-              ]
+              ],
+              [{ text: BotMessages.leadGeneration.buttons.launch, callback_data: 'launch_generation' }]
             ]
           }
         });
@@ -181,11 +189,21 @@ export class LeadGenerationScene {
       user.username
     );
 
-    await this.usersService.createCompetitor(
+    
+
+   const competitor = await this.usersService.createCompetitor(
       ctx.from.id,
       session.sites.join(','),
       session.numbers.join(',')
     );
+
+    await this.ordersService.createLeadGeneration(
+      user.id,
+      competitor.id,
+      session.max_leads,
+      session.day_leads_limit
+    );
+
 
     await ctx.reply('Настройки сохранены. Система будет настроена в течение 24 часов.', {
       reply_markup: {

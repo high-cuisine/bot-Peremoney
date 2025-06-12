@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common'
-import { Action, Ctx, Scene, SceneEnter, On, Command } from 'nestjs-telegraf'
+import { Action, Ctx, Scene, SceneEnter, On, Command, Hears } from 'nestjs-telegraf'
 import { AdminService } from 'src/modules/admin/admin.service'
 import { UsersService } from 'src/modules/users/users.service'
 import { Markup } from 'telegraf'
 import { SceneContext } from 'telegraf/typings/scenes'
+import { BotMessages } from '../../messages/messages'
+import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper'
 
 interface BuyingLeadsSession {
   step: 'quantity' | 'payment'
@@ -11,7 +13,7 @@ interface BuyingLeadsSession {
 }
 
 @Injectable()
-@Scene('buying-leads')
+@Scene('buying_leads')
 export class BuyingLeadsScene {
   constructor(
     private adminService: AdminService,
@@ -24,21 +26,26 @@ export class BuyingLeadsScene {
       '👋 Добро пожаловать в раздел покупки лидов!\n\n' +
       'Пожалуйста, введите желаемое количество лидов:'
     )
+    await addCancelButton(ctx)
   }
 
   @On('text')
   async onMessage(@Ctx() ctx: SceneContext) {
-    if (!ctx.scene || ctx.scene.current.id !== 'buying-leads') {
+    const text = (ctx.message as any).text
+    
+    if (await handleCancelButton(ctx, text)) {
       return
     }
 
-    const session = ctx.session['buying-leads'] as BuyingLeadsSession
+    if (!ctx.scene || ctx.scene.current.id !== 'buying_leads') {
+      return
+    }
+
+    const session = ctx.session['buying_leads'] as BuyingLeadsSession
     if (!session) {
       await ctx.scene.leave()
       return
     }
-
-    const text = ctx.message['text']
 
     switch (session.step) {
       case 'quantity':
@@ -51,7 +58,7 @@ export class BuyingLeadsScene {
         session.step = 'payment'
         
         // Расчет стоимости
-        const price = quantity * 100 // Пример расчета: 100 рублей за лид
+        const price = quantity * 70 // Пример расчета: 100 рублей за лид
         
         await ctx.replyWithHTML(
           `📝 Проверьте детали заказа:\n\n` +
@@ -60,8 +67,8 @@ export class BuyingLeadsScene {
           `Перейти к оплате?`,
           Markup.inlineKeyboard([
             [
-              Markup.button.callback('💳 Оплатить', 'process_payment'),
-              Markup.button.callback('❌ Отмена', 'cancel_purchase')
+              { text: 'Пополнить баланс', callback_data: `top_up_balance:${price}` },
+              { text: 'Отменить заказ', callback_data: 'cancel_purchase' },
             ]
           ])
         )
@@ -71,11 +78,11 @@ export class BuyingLeadsScene {
 
   @Action('process_payment')
   async onPayment(@Ctx() ctx: SceneContext) {
-    if (!ctx.scene || ctx.scene.current.id !== 'buying-leads') {
+    if (!ctx.scene || ctx.scene.current.id !== 'buying_leads') {
       return
     }
 
-    const session = ctx.session['buying-leads'] as BuyingLeadsSession
+    const session = ctx.session['buying_leads'] as BuyingLeadsSession
     if (!session || !session.quantity) {
       await ctx.scene.leave()
       return
@@ -107,7 +114,7 @@ export class BuyingLeadsScene {
 
   @Action('cancel_purchase')
   async onCancel(@Ctx() ctx: SceneContext) {
-    if (!ctx.scene || ctx.scene.current.id !== 'buying-leads') {
+      if (!ctx.scene || ctx.scene.current.id !== 'buying_leads') {
       return
     }
 

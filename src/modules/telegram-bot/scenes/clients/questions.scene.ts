@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { Action, Ctx, Scene, SceneEnter, On, Command } from 'nestjs-telegraf'
+import { Action, Ctx, Scene, SceneEnter, On, Command, Hears } from 'nestjs-telegraf'
 import { Markup } from 'telegraf'
 import { SceneContext } from 'telegraf/typings/scenes'
 import { BotMessages } from '../../messages/messages'
 import { isNumber } from 'class-validator'
 import { UsersService } from 'src/modules/users/users.service'
 import { AdminService } from 'src/modules/admin/admin.service'
+import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper'
 
 //import { BotMessage, getTelegramMessage } from 'src/util/bot_messages'
 
@@ -31,6 +32,7 @@ export class RegisterScene {
     await ctx.replyWithHTML(
       BotMessages.survey.intro
     )
+    await addCancelButton(ctx)
   }
 
   @On('text')
@@ -46,6 +48,10 @@ export class RegisterScene {
     }
 
     const text = ctx.message['text']
+
+    if (await handleCancelButton(ctx, text)) {
+      return
+    }
 
     if(text === '-') {
       switch (session.step) {

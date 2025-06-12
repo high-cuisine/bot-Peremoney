@@ -1,45 +1,48 @@
-# Используем Node.js 20 (LTS)
+# Build stage
 FROM node:20-alpine AS builder
 
-# Устанавливаем зависимости для сборки (включая Python)
-RUN apk add --no-cache openssl python3 make g++
-
-# Создаем рабочую директорию
 WORKDIR /app
 
-# Копируем все файлы проекта
+# Install Python and build tools
+RUN apk add --no-cache python3 make g++
+
+# Copy package files
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install dependencies
+RUN npm ci
+
+# Copy source code
 COPY . .
 
-# Показываем содержимое директории
-RUN ls -la
-
-# Устанавливаем зависимости с игнорированием peer-зависимостей
-RUN npm install --legacy-peer-deps --force
-
-# Генерируем Prisma клиент
-RUN npx prisma generate
-
-# Собираем приложение
+# Build the application
 RUN npm run build
 
-# Финальный образ
+# Production stage
 FROM node:20-alpine
 
-# Устанавливаем зависимости для Prisma
-RUN apk add --no-cache openssl
-
-# Создаем рабочую директорию
 WORKDIR /app
 
-# Копируем только необходимое из builder
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
+# Install Python, build tools, netcat and postgresql-client
+RUN apk add --no-cache python3 make g++ netcat-openbsd postgresql-client
+
+# Copy package files
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install production dependencies only
+RUN npm ci --only=production --ignore-scripts
+
+# Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
 
+# Copy wait-for-db script
+COPY wait-for-db.sh ./
+RUN chmod +x wait-for-db.sh
 
-# Экспонируем порт
+# Expose the application port
 EXPOSE 3000
 
-# Запускаем миграции и приложение
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]
+# Start the application
+CMD ["./wait-for-db.sh", "npm", "run", "start:migrate:prod"] 

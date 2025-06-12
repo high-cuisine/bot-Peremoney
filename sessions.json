@@ -3,10 +3,7 @@
     {
       "id": "1042650482:1042650482",
       "data": {
-        "__scenes": {
-          "current": "sms_mailing",
-          "state": {}
-        },
+        "__scenes": {},
         "register": {
           "step": "confirmation",
           "name": "Александр",
@@ -24,8 +21,8 @@
           "sites": [],
           "numbers": [],
           "time_period": "1_month",
-          "max_leads": 4,
-          "day_leads_limit": 4
+          "max_leads": 6,
+          "day_leads_limit": 8
         },
         "sendUserExelDeAnonymization": {
           "step": "documentId",
@@ -42,7 +39,7 @@
           "step": "instructions"
         },
         "startInviting": {
-          "step": "excel_file",
+          "step": "instructions",
           "groupLink": "https://t.me/testchannel23325",
           "groupId": "12"
         },
@@ -51,14 +48,14 @@
         },
         "startMailing": {
           "step": "excel_file",
-          "message": "ntcn"
+          "message": "тест"
         },
         "sms_mailing": {
           "step": "instructions"
         },
         "smsMailing": {
           "step": "excel_file",
-          "message": "test"
+          "message": "ttt"
         },
         "setting_cabinet": {
           "step": "company_name"
@@ -81,6 +78,28 @@
           "website": "w",
           "address": "w",
           "description": "w"
+        },
+        "buying_leads": {
+          "step": "payment",
+          "quantity": 3
+        },
+        "load_crm": {
+          "step": "key",
+          "type": "bitrix24",
+          "key": "nniewfnweofwennwef"
+        },
+        "start_calling": {
+          "step": "instructions"
+        },
+        "startCalling": {
+          "step": "confirmation",
+          "callText": "Алло! Здравствуйте! Это Ваши конкуренты, мы только что переманили Вашего самого ценного клиента. Неприятно? Если не хотите тратить деньги на дорогую рекламу с низкой конверсией, рекомендуем попробовать перехват клиентов у конкурентов с сервисом Peremoney! Мы даем не только номера телефонов, но и доступ к рассылкам, обзвону роботом, инвайтингу и догоняющей рекламе! Больше 7 инструментов для касаний лидов и все работает автоматически без менеджеров и долгих настроек! Первые 100 лидов в подарок для новых клиентов! Если Вас заинтересовало, скажите \"Да\". Если нет, скажите \"Нет\". текст звонка",
+          "phoneNumbers": [
+            "phone",
+            "+79658879405",
+            "+79379697474",
+            "[object Object]"
+          ]
         }
       }
     },
@@ -223,12 +242,69 @@
     {
       "id": "6711792303:6711792303",
       "data": {
-        "__scenes": {},
+        "__scenes": {
+          "current": "sms_mailing",
+          "state": {}
+        },
         "register": {
           "step": "confirmation",
           "name": "Николай",
           "phone": "+79152424504",
           "email": "Snick-2001@yandex.ru"
+        },
+        "start_mailing": {
+          "step": "instructions"
+        },
+        "startMailing": {
+          "step": "instructions",
+          "message": "Привет. Это тестовая рассылка сервиса Peremoney. Как дела?"
+        },
+        "start_inviting": {
+          "step": "instructions"
+        },
+        "startInviting": {
+          "step": "instructions",
+          "groupLink": "https://t.me/+Ti2oekCSdDxhMDQy",
+          "groupId": "46784948"
+        },
+        "buying_leads": {
+          "step": "payment",
+          "quantity": 1
+        },
+        "lead_generation": {
+          "step": "sites"
+        },
+        "leadGeneration": {
+          "step": "launch",
+          "sites": [
+            "Рро\nРоь\nРол"
+          ],
+          "numbers": [
+            "Ррол"
+          ],
+          "time_period": "1_day",
+          "max_leads": null,
+          "day_leads_limit": 6
+        },
+        "start_calling": {
+          "step": "instructions"
+        },
+        "startCalling": {
+          "step": "confirmation",
+          "callText": "Алло! Здравствуйте! Это Ваши конкуренты, мы только что переманили Вашего самого ценного клиента. Неприятно? Если не хотите тратить деньги на дорогую рекламу с низкой конверсией, рекомендуем попробовать перехват клиентов у конкурентов с сервисом Peremoney! Мы даем не только номера телефонов, но и доступ к рассылкам, обзвону роботом, инвайтингу и догоняющей рекламе! Больше 7 инструментов для касаний лидов и все работает автоматически без менеджеров и долгих настроек! Первые 100 лидов в подарок для новых клиентов! Если Вас заинтересовало, скажите \"Да\". Если нет, скажите \"Нет\".",
+          "phoneNumbers": [
+            "79152424504",
+            "79275582520",
+            "79001583545",
+            "79658879405"
+          ]
+        },
+        "sms_mailing": {
+          "step": "instructions"
+        },
+        "smsMailing": {
+          "step": "excel_file",
+          "message": "Обновить бота"
         }
       }
     },
@@ -276,6 +352,62 @@
           "step": "confirmation",
           "name": "Светлана",
           "phone": "+79110845618"
+        }
+      }
+    },
+    {
+      "id": "5119209576:5119209576",
+      "data": {
+        "__scenes": {},
+        "register": {
+          "step": "confirmation",
+          "name": "Анна",
+          "phone": "+79773758712"
+        }
+      }
+    },
+    {
+      "id": "5757769500:5757769500",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "6812918485:6812918485",
+      "data": {
+        "__scenes": {},
+        "register": {
+          "step": "confirmation",
+          "name": "Ангелина",
+          "phone": "+79680171333"
+        }
+      }
+    },
+    {
+      "id": "7942944066:7942944066",
+      "data": {
+        "__scenes": {},
+        "register": {
+          "step": "confirmation",
+          "name": "The",
+          "phone": "+79658879405"
+        },
+        "lead_generation": {
+          "step": "sites"
+        },
+        "leadGeneration": {
+          "step": "launch",
+          "sites": [
+            "Reed",
+            "опрос"
+          ],
+          "numbers": [
+            "79",
+            "778"
+          ],
+          "time_period": "1_week",
+          "max_leads": 6,
+          "day_leads_limit": 6
         }
       }
     }

@@ -17,6 +17,23 @@ import { StartInvitingScene } from './scenes/auto/start-inviting.scene';
 import { StartMailingScene } from './scenes/auto/start-mailing.scene';
 import { SmsMailingScene } from './scenes/auto/sms-mailing.scene';
 import { SettingCabinetScene } from './scenes/clients/setting_cabinet.scene';
+import { BannedGuard } from '../../common/guards/banned.guard';
+import { RedisModuleCustom } from '../../core/redis/redis.module';
+import { PrismaModule } from '../../core/prisma/prisma.module';
+import { BannedMiddleware } from './middleware/banned.middleware';
+import { AdminBanUserScene } from './scenes/admin/users-management/admin-ban-user.scene';
+import { AdminUnbanUserScene } from './scenes/admin/users-management/admin-unban-user.scene';
+import { ChangeRateScene } from './scenes/admin/users-management/change-rate.scene';
+import { ChangeLeadsScene } from './scenes/admin/orders-management/change-leads.scene';
+import { SetModeratorScene } from './scenes/admin/users-management/set-moderator.scene';
+import { ShowUsersScene } from './scenes/admin/users-management/show-users.scene';
+import { ShowOrdersScene } from './scenes/admin/orders-management/show-orders.scene';
+import { SetCompanyNameScene } from './scenes/admin/orders-management/set-company-name.scene';
+import { PaymentModule } from '../payment/payment.module';
+import { BuyingLeadsScene } from './scenes/clients/buyingLeads.scene';
+import { LoadCRMScene } from './scenes/clients/register-crm.scene';
+import { StartCallingScene } from './scenes/auto/start-calling.scene';
+import { CallsModule } from '../calls/calls.module';
 
 const session = new LocalSession()
 
@@ -26,6 +43,9 @@ const session = new LocalSession()
     UsersModule, 
     ExelModule,
     UserBotsModule,
+    RedisModuleCustom,
+    PaymentModule,
+    PrismaModule,
     forwardRef(() => AdminModule),
     forwardRef(() => MailingModule),
     TelegrafModule.forRootAsync({
@@ -37,10 +57,11 @@ const session = new LocalSession()
         middlewares: [session.middleware()],
       }),
     }),
+    CallsModule,
   ],
   providers: [
     BotUpdate,
-    TelegramBotService, // ⬅️ должен быть в exports тоже
+    TelegramBotService,
     RegisterScene,
     LeadGenerationScene,
     LoadUserExelDeanonymization,
@@ -48,8 +69,22 @@ const session = new LocalSession()
     StartInvitingScene,
     StartMailingScene,
     SmsMailingScene,
-    SettingCabinetScene
+    SettingCabinetScene,
+    BannedGuard,
+    BannedMiddleware,
+
+    AdminBanUserScene,
+    AdminUnbanUserScene,  
+    ChangeRateScene, 
+    ChangeLeadsScene,
+    SetModeratorScene,
+    ShowUsersScene,
+    ShowOrdersScene,
+    SetCompanyNameScene,
+    BuyingLeadsScene,
+    LoadCRMScene,
+    StartCallingScene,
   ],
-  exports: [TelegramBotService], // ⬅️ ВАЖНО!
+  exports: [TelegramBotService],
 })
 export class TelegramBotModule {}

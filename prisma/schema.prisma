@@ -7,24 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id          Int               @id @default(autoincrement())
-  telegramId  BigInt            @unique
-  username    String            @unique
-  name        String            @default("")
-  phone       String            @default("")
-  role        UserRoles         @default(user)
-  rate        UserRate          @default(default)
-  lastAction  DateTime          @default(now())
-  firstAction DateTime          @default(now())
-  leads   Int                   @default(0)
-  isTakingFreeLeads Boolean     @default(false)
-  isBanned    Boolean           @default(false)
-  clients     UsersClients[]
-  estimation  UsersEstimation[]
-  questions   UsersQuestion[]
-  competitors Competitors[]
+  id                Int       @id @default(autoincrement())
+  telegramId        BigInt    @unique
+  username          String    @unique
+  name              String    @default("")
+  phone             String    @default("")
+  role              UserRoles @default(user)
+  rate              UserRate  @default(default)
+  lastAction        DateTime  @default(now())
+  firstAction       DateTime  @default(now())
+  leads             Int       @default(0)
+  isTakingFreeLeads Boolean   @default(false)
+  isBanned          Boolean   @default(false)
+
+  clients        UsersClients[]
+  estimation     UsersEstimation[]
+  questions      UsersQuestion[]
+  competitors    Competitors[]
+  leadGeneration LeadGeneration[]
+  payments       Payments[]
+  userSales      UserSales?
+  userCRM        UserCRM?
+  inviting       Inviting?
 
   @@index([telegramId])
   @@map("users")
@@ -49,15 +54,23 @@ model UsersEstimation {
   userId     Int
   estimation Int
   user       User @relation(fields: [userId], references: [id])
+
+  @@map("users_estimation")
 }
 
 model LeadGeneration {
-  id         Int  @id @default(autoincrement())
-  userId     Int
-  companyId  Int
-  maxCount   Int
-  dailyCount Int
-  
+  id           Int    @id @default(autoincrement())
+  competitorId Int
+  userId       Int
+  maxCount     Int
+  dailyCount   Int
+  projectName  String @default("")
+  companyNameForCalling String?
+
+  user       User        @relation(fields: [userId], references: [id])
+  competitor Competitors @relation(fields: [competitorId], references: [id])
+
+  @@map("lead_generation")
 }
 
 model UsersClients {
@@ -68,16 +81,74 @@ model UsersClients {
   email      String
   telegramId BigInt
   user       User   @relation(fields: [userId], references: [id])
+
+  @@map("users_clients")
 }
 
 model Competitors {
-   id         Int    @id @default(autoincrement())
-   userId     Int
-   webSite    String
-   phone      String
+  id      Int    @id @default(autoincrement())
+  userId  Int
+  webSite String
+  phone   String
 
-   user           User    @relation(fields: [userId], references: [id])
+  leadGeneration LeadGeneration[]
 
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("competitors")
+}
+
+model Payments {
+  id     Int            @id @default(autoincrement())
+  userId Int
+  amount Int
+  Hash   String
+  status PaymentsStatus @default(pending)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("payments")
+}
+
+model UserSales {
+  id     Int @id @default(autoincrement())
+  userId Int @unique // Добавлено @unique для one-to-one отношения
+  amount Int
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_sales")
+}
+
+model UserCRM {
+  id      Int     @id @default(autoincrement())
+  userId  Int     @unique
+  apiKey  String
+  crmType CRMType
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("user_crm")
+}
+
+model UserBots {
+  id          Int     @id @default(autoincrement())
+  username    String
+  session     String
+  phone       String?
+  password    String?
+
+  inviting    Inviting[]
+}
+
+model Inviting {
+  id          Int     @id @default(autoincrement())
+  userId      Int     @unique
+  botId       Int
+  groupName   String
+
+  user User? @relation(fields: [userId], references: [id])
+  userbots UserBots? @relation(fields: [botId], references: [id])
 }
 
 enum UserRoles {
@@ -89,4 +160,15 @@ enum UserRoles {
 enum UserRate {
   default
   pro
+}
+
+enum PaymentsStatus {
+  pending
+  error
+  success
+}
+
+enum CRMType {
+  amo
+  bitrix
 }

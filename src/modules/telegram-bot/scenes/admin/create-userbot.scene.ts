@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Ctx, Scene, SceneEnter, On } from 'nestjs-telegraf';
+import { Ctx, Scene, SceneEnter, On, Command, Hears } from 'nestjs-telegraf';
 import { Markup } from 'telegraf';
 import { SceneContext } from 'telegraf/typings/scenes';
 import { UserBotsService } from 'src/user-bots/user-bots.service';
+import { AdminService } from 'src/modules/admin/admin.service';
+import { BotMessages } from '../../messages/messages';
+import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper';
 
 interface CreateUserbotSession {
   step: 'phone' | 'apiId' | 'apiHash' | 'password' | 'waiting_code' | 'code';
@@ -16,7 +19,8 @@ interface CreateUserbotSession {
 @Scene('create_userbot')
 export class CreateUserbotScene {
   constructor(
-    private readonly userBotsService: UserBotsService
+    private readonly userBotsService: UserBotsService,
+    private readonly adminService: AdminService
   ) {}
 
   @SceneEnter()
@@ -32,17 +36,23 @@ export class CreateUserbotScene {
     await ctx.reply(
       'Введите номер телефона для создания юзербота (в формате +7XXXXXXXXXX):'
     );
+    await addCancelButton(ctx);
   }
 
   @On('text')
   async onText(@Ctx() ctx: SceneContext) {
+    const text = (ctx.message as any).text;
+    
+    if (await handleCancelButton(ctx, text)) {
+      return;
+    }
+
     // Initialize session if it doesn't exist
     if (!ctx.session['createUserbot']) {
       ctx.session['createUserbot'] = {} as CreateUserbotSession;
     }
     
     const session = ctx.session['createUserbot'] as CreateUserbotSession;
-    const text = (ctx.message as any).text;
 
     switch (session.step) {
       case 'phone':
@@ -112,7 +122,7 @@ export class CreateUserbotScene {
         }
         
         try {
-          await this.userBotsService.login(session.phone, session.password, text, parseInt(session.apiId), session.apiHash);
+          //await this.userBotsService.login(session.phone, session.password, text, parseInt(session.apiId), session.apiHash);
           await ctx.reply('Юзербот успешно создан!');
           await ctx.scene.leave();
         } catch (error) {

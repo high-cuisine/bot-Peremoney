@@ -5,10 +5,10 @@ const input = require("input"); // Для ввода кода из SMS
 // Конфигурация (замените на свои данные!)
 const apiId = 9704329; // Ваш API ID (из my.telegram.org)
 const apiHash = "dc73fb86db4d2e1db3b4b23b29fed49d"; // Ваш API Hash
-const phoneNumber = "+56959858621"; // Номер для проверки
+const phoneNumber = "+639532473137"; // Номер для проверки
 
 const findNumber = "+79119767638"
-
+//tutututu
 // Сохраняем сессию, чтобы не вводить код повторно
 const session = new StringSession(""); // Пустая строка = новая сессия
 

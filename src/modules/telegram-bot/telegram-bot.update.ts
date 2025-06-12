@@ -1,4 +1,4 @@
-import { Update, Start, Hears, Ctx, Action, InjectBot, On } from 'nestjs-telegraf';
+import { Update, Start, Hears, Ctx, Action, InjectBot, On, Next } from 'nestjs-telegraf';
 import { Context, Telegraf } from 'telegraf';
 import { TelegramBotService } from './telegram-bot.service';
 import { RegisterScene } from './scenes/clients/register.scene';
@@ -7,17 +7,21 @@ import { SceneContext } from 'telegraf/typings/scenes';
 import { BotMessages } from './messages/messages';
 import { UsersService } from '../users/users.service';
 import { AdminService } from '../admin/admin.service';
+import { BannedMiddleware } from './middleware/banned.middleware';
 
 @Update()
 export class BotUpdate {
   constructor(
-    @InjectBot() private readonly bot: Telegraf<Context>,
+    @InjectBot() private readonly bot: Telegraf<Context> & any,
     private readonly telegramBotService: TelegramBotService,
     private readonly registerScene: RegisterScene,
     private readonly userService: UsersService,
     private readonly adminService: AdminService,
-    private readonly leadGenerationScene: LeadGenerationScene
+    private readonly leadGenerationScene: LeadGenerationScene,
+    private readonly bannedMiddleware: BannedMiddleware
   ) {
+    // Apply banned middleware to all updates
+    this.bot.use(this.bannedMiddleware.use.bind(this.bannedMiddleware));
   }
 
   @Start()
@@ -70,6 +74,8 @@ export class BotUpdate {
 
     await ctx.replyWithHTML(BotMessages.register.success)
     await ctx.scene.leave()
+
+    await this.telegramBotService.sendSupportMessage(ctx.from.id);
 
     await this.telegramBotService.sendMessageFreeBanner(ctx);
   }
@@ -267,7 +273,6 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
     const user = await this.userService.getUserByTelegramId(ctx.from.id);
 
     if (!user || (user.role !== 'admin' && user.role !== 'moderator')) {
-      await ctx.answerCbQuery('Недостаточно прав для выполнения действия', { show_alert: true });
       return;
     }
 
@@ -288,7 +293,7 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
 
     const userId = parseInt(match[1], 10);
 
-    await this.adminService.acceptMailing(userId.toString(), ctx);
+    //await this.adminService.acceptMailing(userId.toString(), ctx);
   } catch (error) {
     console.error('Error in admin_accept_mailing:', error);
     await ctx.answerCbQuery('Произошла ошибка при обработке заявки', { show_alert: true }).catch(console.error);
@@ -320,7 +325,7 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
   }
 
   @Hears('settings')
-  @Hears('Настройкa')
+  @Hears('Инструкция')
   @Action('settings')
   async onSettingsCabinet(@Ctx() ctx: Context & SceneContext) {
     await this.telegramBotService.sendCompetitors(ctx);
@@ -352,7 +357,168 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
 
   @Action('admin_functional')
   async onAdminFunctional(@Ctx() ctx: Context) {
-    //await this.telegramBotService.sendAdminFunctional(ctx);
+    const user = await this.userService.getUserByTelegramId(ctx.from.id);
+
+    if (user?.role !== 'admin' && user?.role !== 'moderator') {
+      return;
+    }
+
+    await this.telegramBotService.sendAdminFunctional(ctx);
+  }
+
+  @Action('admin_ban_user')
+  async onAdminBanUser(@Ctx() ctx: Context & SceneContext) {
+    const user = await this.userService.getUserByTelegramId(ctx.from.id);
+
+    if (user?.role !== 'admin' && user?.role !== 'moderator') {
+      return;
+    }
+    
+
+    await ctx.scene.enter('admin_ban_user');
+  }
+
+  @Action('admin_delete_ban')
+  async onAdminDeleteBan(@Ctx() ctx: Context & SceneContext) {
+    const user = await this.userService.getUserByTelegramId(ctx.from.id);
+
+    if (user?.role !== 'admin' && user?.role !== 'moderator') {
+      return;
+    }
+
+    await ctx.scene.enter('admin_delete_ban');
+  }
+
+  @Action('admin_change_rate')
+  async onAdminChangeRate(@Ctx() ctx: Context & SceneContext) {
+    const user = await this.userService.getUserByTelegramId(ctx.from.id);
+
+    if (user?.role !== 'admin' && user?.role !== 'moderator') {
+      return;
+    }
+
+    // TODO: Implement change rate logic
+    await ctx.scene.enter('admin_change_rate');
+  }
+
+  @Action('admin_change_leads')
+  async onAdminChangeLeads(@Ctx() ctx: Context & SceneContext) {
+    const user = await this.userService.getUserByTelegramId(ctx.from.id);
+
+    if (user?.role !== 'admin' && user?.role !== 'moderator') {
+      return;
+    }
+
+    // TODO: Implement change leads logic
+    await ctx.scene.enter('admin_change_leads');
+  }
+
+  @Action('admin_set_moderator')
+  async onAdminSetModerator(@Ctx() ctx: Context & SceneContext) {
+    const user = await this.userService.getUserByTelegramId(ctx.from.id);
+
+    if (user?.role !== 'admin') {
+      await ctx.answerCbQuery('Только администратор может назначать модераторов', { show_alert: true });
+      return;
+    }
+
+    // TODO: Implement set moderator logic
+    await ctx.scene.enter('admin_set_moderator');
+  }
+
+  @Action('admin_show_users')
+  async onAdminShowUsers(@Ctx() ctx: Context & SceneContext) {
+    const user = await this.userService.getUserByTelegramId(ctx.from.id);
+
+    if (user?.role !== 'admin' && user?.role !== 'moderator') {
+      return;
+    }
+
+    // TODO: Implement show users logic
+    await ctx.scene.enter('admin_show_users');
+  }
+
+  @Action('admin_show_orders')
+  async onAdminShowOrders(@Ctx() ctx: Context & SceneContext) {
+    const user = await this.userService.getUserByTelegramId(ctx.from.id);
+
+    if (user?.role !== 'admin' && user?.role !== 'moderator') {
+      return;
+    }
+
+    // TODO: Implement show orders logic
+    await ctx.scene.enter('admin_show_orders');
+  }
+
+  @Action('admin_set_company_name')
+  async onAdminSetCompanyName(@Ctx() ctx: Context & SceneContext) {
+    const user = await this.userService.getUserByTelegramId(ctx.from.id);
+
+    if (user?.role !== 'admin' && user?.role !== 'moderator') {
+      return;
+    }
+
+    // TODO: Implement set company name logic
+    await ctx.scene.enter('admin_set_company_name');
+  }
+
+  @Action('admin_change_company_name')
+  async onAdminChangeCompanyName(@Ctx() ctx: Context & SceneContext) {
+    const user = await this.userService.getUserByTelegramId(ctx.from.id);
+
+    if (user?.role !== 'admin' && user?.role !== 'moderator') {
+      return;
+    }
+
+    // TODO: Implement change company name logic
+    await ctx.scene.enter('admin_change_company_name');
+  }
+
+  @Action('top_up_balance_order')
+  @Hears('top_up_balance_order')
+  async topUpBalanceOrder(@Ctx() ctx: Context & SceneContext) {
+    await ctx.scene.enter('buying_leads');
+    ctx.session['buying_leads'] = {
+      step: 'quantity'
+    }
+  }
+
+  @Action(/^top_up_balance:(\d+)$/) 
+  async topUpBalance(@Ctx() ctx: Context & any) {
+    console.log(ctx.match)
+    const amount = parseInt(ctx.match[1], 10);
+    await this.telegramBotService.sendInvoice(ctx, amount);
+  }
+
+  @On('pre_checkout_query')
+  async onPreCheckoutQuery(@Ctx() ctx: Context) {
+    await ctx.telegram.answerPreCheckoutQuery(
+      ctx.preCheckoutQuery.id,
+      true
+    );
+  }
+
+  @On('successful_payment')
+  async onSuccessfulPayment(@Ctx() ctx: Context, @Next() next: () => Promise<void>) {
+   
+  }
+
+  @Action('tools_CRM')
+  async onToolsCRM(@Ctx() ctx: Context & SceneContext) {
+    ctx.session['load_crm'] = {
+      step: 'type'
+    }
+
+    await ctx.scene.enter('load_crm');
+  }
+
+  @Action('tools_robot')
+  async onToolsRobot(@Ctx() ctx: Context & SceneContext) {
+    ctx.session['start_calling'] = {
+      step: 'instructions'
+    }
+
+    await ctx.scene.enter('start_calling');
   }
 }
 

@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Ctx, Scene, SceneEnter, On, Command } from 'nestjs-telegraf';
+import { Ctx, Scene, SceneEnter, On, Command, Hears } from 'nestjs-telegraf';
 import { Markup } from 'telegraf';
 import { SceneContext } from 'telegraf/typings/scenes';
 import { AdminService } from 'src/modules/admin/admin.service';
 import { ExelService } from 'src/modules/Exel-Module/exelModule.service';
 import { MailingService } from 'src/modules/mailing/mailing.service';
+import { BotMessages } from '../../messages/messages';
 
 interface SmsMailingSession {
   step: 'instructions' | 'message' | 'excel_file';
@@ -89,11 +90,10 @@ export class SmsMailingScene {
       const response = await fetch(fileLink);
       const buffer = await response.arrayBuffer();
 
-      const leadsData = await this.exelService.readExcel(Buffer.from(buffer), ctx.from.id);
+      const leadsData = await this.exelService.readExelByOneColumn(Buffer.from(buffer));
 
-      const phoneNumbers = leadsData.map(lead => lead.phone);
-
-      await this.mailingService.startMailing(session.message, phoneNumbers);
+      console.log(leadsData, session.message);
+      await this.mailingService.startMailing(session.message, leadsData);
       await ctx.scene.leave();
     }
   }

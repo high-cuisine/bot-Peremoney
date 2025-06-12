@@ -4,6 +4,8 @@ import { AdminService } from 'src/modules/admin/admin.service';
 import { Markup } from 'telegraf';
 import { SceneContext } from 'telegraf/typings/scenes';
 import { ExelService } from 'src/modules/Exel-Module/exelModule.service';
+import { BotMessages } from '../../messages/messages';
+import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper';
 
 interface StartInvitingSession {
   step: 'instructions' | 'group_link' | 'group_id' | 'excel_file';
@@ -29,6 +31,10 @@ export class StartInvitingScene {
     
     const session = ctx.session['startInviting'] as StartInvitingSession;
     session.step = 'instructions';
+
+    await ctx.reply(BotMessages.invaiting.start, {
+      parse_mode: 'HTML',
+    }); 
     
     await ctx.reply(
       'Добро пожаловать в процесс массового приглашения!\n\n' +
@@ -39,24 +45,25 @@ export class StartInvitingScene {
       '4. Номера телефонов должны быть в международном формате\n\n' +
       'Теперь, пожалуйста, отправьте ссылку на группу:'
     );
+
+    await addCancelButton(ctx);
   }
 
   @On('text')
   async onText(@Ctx() ctx: SceneContext) {
+    
+    await ctx.scene.leave();
     if (!ctx.session['startInviting']) {
       ctx.session['startInviting'] = {} as StartInvitingSession;
     }
 
-   
-    
-    const session = ctx.session['startInviting'] as StartInvitingSession;
     const text = (ctx.message as any).text;
-
-    if(text === '/exit') {
-      await ctx.reply('Выход из вопросов');
-      await ctx.scene.leave();
+    
+    if (await handleCancelButton(ctx, text)) {
       return;
     }
+
+    const session = ctx.session['startInviting'] as StartInvitingSession;
 
     switch (session.step) {
       case 'instructions':
@@ -109,8 +116,9 @@ export class StartInvitingScene {
 
       const userNames = leadsData.map(lead => lead.name);
 
-      await this.adminService.sendAdminInvitingOrder(ctx.from.username, session.groupId, session.groupLink, userNames);
+      //await this.adminService.sendAdminInvitingOrder(ctx.from.username, session.groupId, session.groupLink, userNames);
 
+      
       await ctx.reply('Файл получен! Заявка создана');
       await ctx.scene.leave();
     }

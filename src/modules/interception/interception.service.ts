@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
+import { OrdersService } from '../users/orders.service';
 
 @Injectable()
 export class InterceptionService {
 
-    constructor(private readonly usersService: UsersService) {}
+    constructor(
+        private readonly usersService: UsersService,
+        private readonly ordersService: OrdersService
+    ) {}
 
     async startInterception() {
         const {users, leadsGeneration} = await this.usersService.getUsersByLeads();

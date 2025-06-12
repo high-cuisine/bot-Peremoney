@@ -75,4 +75,24 @@ export class ExelService {
         const buffer = await workbook.xlsx.writeBuffer();
         return buffer;
     }
+
+    async readExelByOneColumn(buffer: Buffer):Promise<string[]> {
+        console.log('work');
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer as any);   
+
+        const worksheet = workbook.worksheets[0];
+        const data: any[] = [];
+        worksheet.eachRow((row) => {
+            data.push(row.values);
+        });
+
+        console.log(data);
+
+        const res = data.map(el => String(el[1]));
+
+        console.log(res);
+
+        return res;
+    }
 }

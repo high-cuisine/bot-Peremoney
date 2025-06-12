@@ -12,6 +12,7 @@ import { createReadStream } from 'fs';
 import { SceneContext } from 'telegraf/typings/scenes';
 import { MailingService } from '../mailing/mailing.service';
 import { AdminService } from '../admin/admin.service';
+import { PaymentService } from '../payment/payment.service';
   
 @Injectable()
 export class TelegramBotService {
@@ -21,6 +22,7 @@ export class TelegramBotService {
         private readonly exelService: ExelService,
         private readonly mailingService: MailingService,
         private readonly adminService: AdminService,
+        private readonly paymentService: PaymentService,
         @InjectBot() private readonly bot: Telegraf<Context>,
     ) {}
 
@@ -89,6 +91,7 @@ export class TelegramBotService {
       }
 
       async sendMessage(id:number, message:string) {
+        console.log(id, message);
         await this.bot.telegram.sendMessage(id, message);
       }
 
@@ -120,7 +123,7 @@ export class TelegramBotService {
 
     async checkSubscription(ctx:Context) {
         const member = await this.bot.telegram.getChatMember(CHANNEL_ID, ctx.from.id);
-        const status = ['member', 'administrator', 'creator'].includes(member.status);
+        const status = ['member', 'administrator', 'creator', 'left'].includes(member.status);
         const user = await this.userService.getUserByTelegramId(ctx.from.id);
 
         if(user.isTakingFreeLeads) {
@@ -128,13 +131,16 @@ export class TelegramBotService {
             return;
         }
 
+
         if(status) {
+            const file = createReadStream(join(__dirname, '..', '..', 'assets/instruction.pdf'));
             await this.userService.setFreeLeads(ctx.from.id);
             await ctx.reply(BotMessages.subscription.success,
                 Markup.inlineKeyboard([
                     [{ text: 'Обратно в меню', callback_data: 'start' }]
                 ])
             );
+            await this.bot.telegram.sendDocument(ctx.from.id, { source: file  });
         } else {
             await ctx.reply(BotMessages.subscription.error);
         }
@@ -176,10 +182,11 @@ export class TelegramBotService {
             [{ text: 'Подписка', callback_data: 'tarifs' }],
             [{ text: 'Задать вопрос', url: 'https://t.me/Peremoney_Support' }],
             [{ text: 'Перехват лидов', callback_data: 'lead_generation' }],
-            [{ text: 'Партнерская программа', callback_data: 'partner_program' }],
-            [{ text: 'Реферальная программа', callback_data: 'referral_program' }],
             [{ text: 'Инструменты', callback_data: 'tools' }],
-            [{ text: 'Настройкa', callback_data: 'settings' }]
+            [{ text: 'Инструкция', callback_data: 'settings' }],
+            [{ text: 'Обновить бота', callback_data: 'start' }],
+            [{ text: 'Партнерская программа', callback_data: 'partner_program' }],
+            [{ text: 'Реферальная программа', callback_data: 'referral_program' }]
         ];
     }
 
@@ -195,9 +202,9 @@ export class TelegramBotService {
         return [
             [{ text: 'Инструкция по работе', callback_data: 'tools_instruction' }],
             [{ text: 'Рассылки в Telegram', callback_data: 'tools_telegram' }],
-            [{ text: 'Рассылки по SMS', callback_data: 'tools_sms' }],
-            [{ text: 'Рассылки по Telegram', callback_data: 'tools_telegram' }],
+            [{ text: 'Обзвон роботом', callback_data: 'tools_robot' }],
             [{ text: 'Инвайтинг в Телеграм', callback_data: 'tools_inviting' }],
+            [{ text: 'Настроить выгрузку в CRM', callback_data: 'tools_CRM'}],
             [{ text: 'Настройка точечной рекламы', url: 'https://t.me/Peremoney_Support' }],
         ]
     }
@@ -215,9 +222,10 @@ export class TelegramBotService {
 
     async sendRates(ctx:Context) {
         await ctx.reply(BotMessages.tariff.description, {
+            parse_mode: 'HTML',
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: 'Пополнить баланс', callback_data: 'tariff_mini' }],
+                    [{ text: 'Пополнить баланс', callback_data: 'top_up_balance_order' }],
                     [{ text: 'Купить подписку Pro', callback_data: 'tariff_pro' }],
                     [{ text: 'Купить подписку Premium', callback_data: 'tariff_premium' }],
                 ]
@@ -276,7 +284,7 @@ export class TelegramBotService {
         await ctx.reply(BotMessages.balance.getBalance(Number(user.leads)), {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: 'Пополнить баланс', callback_data: 'top_up_balance' }]
+                    [{ text: 'Пополнить баланс', callback_data: 'top_up_balance_order' }]
                 ]
             }
         });
@@ -402,10 +410,9 @@ export class TelegramBotService {
         const competitors = await this.userService.getCompetitors(ctx.from.id);
         
         await ctx.reply(`Ваши конкуренты:
-сайты: ${competitors.map(competitor => competitor.webSite).join('')}
-номера: ${competitors.map(competitor => competitor.phone).join('')}
-
-            `);
+            сайты: ${competitors.map(competitor => competitor.webSite).join(',')}
+            номера: ${competitors.map(competitor => competitor.phone).join(',')}
+        `);
     }
 
     async sendRefLink(ctx:Context) {
@@ -420,4 +427,131 @@ export class TelegramBotService {
         });
     }
 
+    async sendAdminFunctional(ctx:Context) {
+        await ctx.reply('Админ функционал:', {
+            reply_markup: {
+                inline_keyboard: [
+                    [{ text: 'Бан человека', callback_data: 'admin_ban_user' }],
+                    [{ text: 'Снять бан', callback_data: 'admin_delete_ban' }],
+                    [{ text: 'Изменить тариф', callback_data: 'admin_change_rate' }],
+                    [{ text: 'Изменить лидов', callback_data: 'admin_change_leads' }],
+                    [{ text: 'Назначить модератора', callback_data: 'admin_set_moderator' }],
+                    [{ text: 'Просмотр всех пользователей', callback_data: 'admin_show_users' }],
+                    [{ text: 'Просмотр всех заказов', callback_data: 'admin_show_orders' }],
+                    [{ text: 'Задать имя компании человеку', callback_data: 'admin_set_company_name' }],
+                    
+                ]
+            }
+        });
+    }
+
+    async handleStarPayment(ctx: Context) {
+        const message = ctx.message as any;
+        if (!message?.sticker?.emoji || message.sticker.emoji !== '⭐') {
+            await ctx.reply('Пожалуйста, отправьте звезду (⭐) для оплаты.');
+            return;
+        }
+
+        const user = await this.userService.getUserByTelegramId(ctx.from.id);
+        if (!user) {
+            await ctx.reply('Пользователь не найден. Пожалуйста, зарегистрируйтесь.');
+            return;
+        }
+
+        // Конвертируем звезду в лиды (1 звезда = 1 лид)
+        const starsToLeads = 1.2;
+        await this.userService.updateUser(user.username, { leads: user.leads + starsToLeads });
+
+        await ctx.reply(`Оплата успешно произведена! Начислено ${starsToLeads} лид(ов).`, {
+            reply_markup: {
+                inline_keyboard: [
+                    [{ text: 'Проверить баланс', callback_data: 'balance' }],
+                    [{ text: 'Вернуться в меню', callback_data: 'start' }]
+                ]
+            }
+        });
+    }
+
+    async sendStarPaymentInstructions(ctx: Context) {
+        await ctx.reply(
+            'Для оплаты отправьте звезду (⭐) в чат.\n' +
+            '1 звезда = 1 лид\n\n' +
+            'После отправки звезды, баланс будет автоматически пополнен.',
+            {
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: 'Проверить баланс', callback_data: 'balance' }],
+                        [{ text: 'Вернуться в меню', callback_data: 'start' }]
+                    ]
+                }
+            }
+        );
+    }
+
+    async createStarsLink(userId:number, amount:number) {
+  
+        const data = {
+            title: 'Meercat Coin',
+            description: 'Virtual Purchase',
+            payload: `User_${userId}`,
+            currency: 'XTR',
+            prices: JSON.stringify([{amount: amount, label: `XTR`}]),
+          };
+          const params = new URLSearchParams(data).toString();
+      
+          const response = await fetch(
+            `https://api.telegram.org/bot${process.env.BOT_TOKEN}/createInvoiceLink?${params}`
+          );
+          const json = await response.json();
+          const id = Date.now();
+
+          
+        return json?.result;
+    }
+
+    async succsesPayment(ctx:Context) {
+         
+    }
+
+    async preCheckoutQuery (query: { id: string; }, ctx:Context) {
+        console.log("Received pre-checkout query:", query);
+
+        await ctx.telegram.answerPreCheckoutQuery(
+          query.id,
+          true
+        );
+      
+    };
+
+    async sendInvoice(ctx:Context, amount:number) {
+
+        await this.paymentService.createPayment(ctx.from.id, amount / 70);
+
+        const sale = await this.paymentService.findSale(ctx.from.id);
+
+        const price = sale ? amount * sale.amount : amount;
+
+        const finalPrice = Math.floor(price / 179 * 100);
+
+        await ctx.sendInvoice({
+            title: `Пополнение баланса на ${price} RUB`,
+            description: `Пополнение баланса в боте на сумму ${price} рублей`,
+            payload: "${payment._id}",
+            currency: 'XTR',
+            prices: [{ label: 'XTR', amount: finalPrice }],
+            provider_token: '',
+        });
+    }
+
+    async sendSupportMessage(userId: number) {
+        const message = await this.bot.telegram.sendMessage(userId, 'Нужна помощь? Свяжитесь с поддержкой:', {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: 'Написать в поддержку', url: 'https://t.me/Peremoney_Support' }],
+            ]
+          },
+        });
+    
+        await this.bot.telegram.pinChatMessage(userId, message.message_id);
+      }
 }

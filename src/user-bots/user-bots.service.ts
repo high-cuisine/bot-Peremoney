@@ -3,6 +3,7 @@ import { RedisService } from 'src/core/redis/redis.service';
 import { TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
 import { Api } from 'telegram/tl';
+import { PrismaService } from '../core/prisma/Prisma.service';
 
  
 @Injectable()
@@ -10,6 +11,7 @@ export class UserBotsService {
 
     constructor(
         private readonly redisService: RedisService,
+        private readonly prisma: PrismaService,
     ) {
         this.apiId = 9704329;
         this.apiHash = "dc73fb86db4d2e1db3b4b23b29fed49d";
@@ -18,43 +20,52 @@ export class UserBotsService {
     private readonly apiId: number;
     private readonly apiHash: string;
 
-    async login(phoneNumber:string, password:string, phoneCode:string, apiId:number, apiHash:string) {
-        const stringSession = new StringSession('');
-        const client = new TelegramClient(stringSession, apiId, apiHash, {
-            connectionRetries: 1,
-        });
-        const sessionString = "1AgAOMTQ5LjE1NC4xNjcuNTABuwibbclWw/Ci9r6YDlNThvtQTntE0eIcxGzRh8WU7mCyH86cvrZ+DUx0BIX3YduhHsEHZa+ku/+AllJeAd7+mhJMpiDayCCnvf7KU+VzDL5LqnjrfpSrbaHMSUU4UuOFrsOpUDgQJPb0iG90gn1jmohmXIxpFmVhgCFhsweGkzNS9uDdUb2J4eXPxItbACpYaGLEMe0tABc8hPxMxqZSDWKYTRhixxNjc7p2sQqzILJejxxLjrQSXBKD4vlJAosV9+63CaeahWcUsc7LiK8R5oa/73Gl3+9A09RlHXo4rIyaW3PSjRpU0XnqJl+D+WM4+q5I6miq9jj/AU+roWh7zso=";
+    async login() {
+        
+        const userbot = await this.prisma.userBots.findMany();
 
-        await this.redisService.set(`userbot_session:${phoneNumber}`, sessionString);
+        const randomUserbot = userbot[Math.floor(Math.random() * userbot.length)];
 
-        return;
-        try {
-            await client.connect();
-            await client.start({
-                phoneNumber: async () => phoneNumber,
-                phoneCode: async () => phoneCode,
-                password: async () => password,
-                onError: (err: any) => {
-                    console.error('Login error:', err);
-                    if (err.message.includes('FLOOD')) {
-                        const seconds = err.seconds || 0;
-                        const minutes = Math.ceil(seconds / 60);
-                        console.log(`Flood wait: ${minutes} minutes`);
-                    }
-                },
-            });
+        return randomUserbot.session;
+     
+    }
 
-            await this.redisService.del(`code_sent:${phoneNumber}`);
-            const sessionString = stringSession.save();
-            await this.redisService.set(`userbot_session:${phoneNumber}`, sessionString);
-            
-            return sessionString;
-        } catch (error) {
-            console.error('Error during login:', error);
-            throw error;
-        } finally {
-            await client.disconnect();
+    async getUserBotWorking() {
+        const userbots = await this.prisma.userBots.findMany();
+        
+        for (const userbot of userbots) {
+            const client = new TelegramClient(
+                new StringSession(userbot.session),
+                this.apiId,
+                this.apiHash,
+                {
+                    connectionRetries: 2,
+                    useWSS: true,
+                    autoReconnect: true
+                }
+            );
+
+            try {
+                await client.connect();
+                
+                // Проверяем работоспособность бота
+                const me = await client.getMe();
+                if (me) {
+                    await client.disconnect();
+                    return userbot;
+                }
+            } catch (error) {
+                console.error(`Userbot ${userbot.username} is not working:`, error);
+            } finally {
+                try {
+                    await client.disconnect();
+                } catch (e) {
+                    console.error('Error disconnecting client:', e);
+                }
+            }
         }
+
+        return null; // Если ни один бот не работает
     }
 
     async sendCode(phoneNumber: string, apiId: number, apiHash: string) {
@@ -91,41 +102,6 @@ export class UserBotsService {
         }
     }
 
-    async signIn(phoneNumber: string, code: string, apiId: number, apiHash: string) {
-        
-        // Get the stored session string and phoneCodeHash
-        const sessionString = await this.redisService.get(`userbot_session:${phoneNumber}`);
-        const phoneCodeHash = await this.redisService.get(`phone_code_hash:${phoneNumber}`);
-        
-        if (!sessionString || !phoneCodeHash) {
-            throw new Error('No session or phone code hash found for this phone number');
-        }
-
-        const stringSession = new StringSession(sessionString);
-        const client = new TelegramClient(stringSession, apiId, apiHash, {
-            connectionRetries: 5,
-        });
-
-        try {
-            await client.connect();
-            const result = await client.invoke(new Api.auth.SignIn({
-                phoneNumber,
-                phoneCode: code,
-                phoneCodeHash,
-            }));
-
-            // Update the session string in Redis
-            await this.redisService.set(`userbot_session:${phoneNumber}`, stringSession.save());
-            
-            console.log('Signed in successfully:', result);
-            return result;
-        } catch (error) {
-            console.error('Error signing in:', error);
-            throw error;
-        } finally {
-            await client.disconnect();
-        }
-    }
 
     async checkValidSession(phoneNumber: string) {
         const sessionString = await this.redisService.get(`userbot_session:${phoneNumber}`);
@@ -261,7 +237,8 @@ export class UserBotsService {
         let client: TelegramClient | null = null;
     
         try {
-            const sessionString = await this.redisService.srandmember("telegram:userbots");
+            //const sessionString = await this.redisService.srandmember("telegram:userbots");
+            const sessionString = await this.login();
             console.log(sessionString);
             if (!sessionString) {
                 console.log("Сессии не найдены в Redis");
@@ -333,36 +310,70 @@ export class UserBotsService {
 
 
     async createMailing(usernames: string[], message: string) {
-        let client: TelegramClient | null = null;
-
-        try {
-            const sessionString = await this.redisService.srandmember("telegram:userbots");
-            if (!sessionString) {
-                console.log("No session found in Redis");
-                return null;
+        let usedSessions = new Set<string>();
+        const remainingUsers = new Set(usernames);
+        const attempts = new Map<string, number>();
+    
+        while (remainingUsers.size > 0) {
+            let sessionString = await this.redisService.srandmember("telegram:userbots");
+    
+            // Если нет новых сессий — пробуем логин вручную
+            if (!sessionString || usedSessions.has(sessionString)) {
+                sessionString = await this.login();
+                if (!sessionString) {
+                    console.log("Нет доступных аккаунтов");
+                    break;
+                }
             }
-
+    
+            usedSessions.add(sessionString);
             const stringSession = new StringSession(sessionString);
-            client = new TelegramClient(stringSession, this.apiId, this.apiHash, {
+            const client = new TelegramClient(stringSession, this.apiId, this.apiHash, {
                 connectionRetries: 2,
+                useWSS: true,
+                autoReconnect: true
             });
-
-            await client.connect();
-
-            for(const username of usernames) {
-                const user = await client.getEntity(username);
-                await client.sendMessage(user, { message });
-            }
-        }
-        catch(error) {
-            console.error("Error in createMailing:", error);
-        }
-        finally {
-            if (client) {
+    
+            try {
+                await client.connect();
+                // Отключаем получение обновлений
+                await client.invoke(new Api.updates.GetState());
+                await client.invoke(new Api.updates.GetDifference({
+                    pts: 0,
+                    date: 0,
+                    qts: 0
+                }));
+    
+                for (const username of [...remainingUsers]) {
+                    let attempt = attempts.get(username) ?? 0;
+    
+                    if (attempt >= 3) {
+                        remainingUsers.delete(username);
+                        continue;
+                    }
+    
+                    try {
+                        const user = await client.getEntity(username);
+                        await client.sendMessage(user, { message });
+    
+                        console.log(`✅ Успешно отправлено ${username}`);
+                        remainingUsers.delete(username); // убираем из списка
+                    } catch (err) {
+                        attempts.set(username, attempt + 1);
+                        console.warn(`⚠️ Ошибка при отправке ${username}, попытка ${attempt + 1}`);
+                    }
+                }
+    
+            } catch (error) {
+                console.error("❌ Ошибка при работе с аккаунтом:", error);
+            } finally {
                 await client.disconnect();
             }
         }
+    
+        console.log("📨 Рассылка завершена");
     }
+    
 
 }
 
