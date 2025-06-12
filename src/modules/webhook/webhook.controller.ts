@@ -1,4 +1,5 @@
 import { Body, Controller, Post, Logger, Req } from '@nestjs/common';
+import { Request } from 'express';
 
 @Controller('webhook')
 export class WebhookController {
@@ -7,9 +8,9 @@ export class WebhookController {
   @Post('')
   async webhook(@Body() body: any, @Req() req: Request) {
     // Для postback из Zvonok нужно использовать req.query, но вдруг они шлют body (перестраховка)
-    const phone = req.params.phone;
-    const company = req.params.company;
-    const status = req.params.status;;
+    const phone = req.query.phone;
+    const company = req.query.company;
+    const status = req.query.status;
 
     if (!phone) {
       this.logger.warn('Получен postback без номера телефона:', body);
