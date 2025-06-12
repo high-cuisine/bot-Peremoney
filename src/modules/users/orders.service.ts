@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/core/prisma/Prisma.service';
 import { RedisService } from 'src/core/redis/redis.service';
 import { UsersService } from './users.service';
@@ -6,6 +6,7 @@ import { TelegramBotService } from '../telegram-bot/telegram-bot.service';
 
 @Injectable()
 export class OrdersService {
+    private readonly logger = new Logger(OrdersService.name);
     constructor(
         private readonly prisma: PrismaService,
         private readonly redis: RedisService,
@@ -63,7 +64,7 @@ export class OrdersService {
 
     async notifyUserByCompany(companyPhone:string, status:string, phone:string) {
         //if(status !== 'compl_finished') return;
-        console.log(companyPhone, status, phone, 'уведомление');
+        this.logger.log(companyPhone, status, phone, 'уведомление');
         const leadGeneration = await this.prisma.leadGeneration.findFirst({
             where: {
                 companyNameForCalling:companyPhone
