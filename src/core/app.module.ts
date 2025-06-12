@@ -7,6 +7,7 @@ import { join } from 'path';
 import { MailingModule } from 'src/modules/mailing/mailing.module';
 import { AdminModule } from 'src/modules/admin/admin.module';
 import { RedisModuleCustom } from './redis/redis.module';
+import { WebhookModule } from 'src/modules/webhook/webhook.module';
 
 @Module({
   imports: [UsersModule, TelegramBotModule, MailingModule, AdminModule,
@@ -18,7 +19,8 @@ import { RedisModuleCustom } from './redis/redis.module';
         fallthrough: false,
       },
     }),
-    RedisModuleCustom
+    RedisModuleCustom,
+    WebhookModule
   ],
   controllers: [],
   providers: [PrismaService],
