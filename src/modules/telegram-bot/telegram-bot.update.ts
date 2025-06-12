@@ -520,6 +520,36 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
 
     await ctx.scene.enter('start_calling');
   }
+
+  @Action(/^admin_accept_calls:\d+$/) // Регулярное выражение для паттерна
+  async onAdminAcceptCalls(@Ctx() ctx: Context & SceneContext) {
+    const user = await this.userService.getUserByTelegramId(ctx.from.id);
+
+    if (user?.role !== 'admin' && user?.role !== 'moderator') {
+      return;
+    }
+
+    try {
+      // Проверка наличия данных
+      if (!ctx.callbackQuery || !('data' in ctx.callbackQuery)) {
+        throw new Error('No callback data');
+      }
+
+      // Безопасное извлечение параметров
+      const match = ctx.callbackQuery.data.match(/^admin_accept_calls:(\d+)$/);
+      if (!match) {
+        throw new Error('Invalid callback data format');
+      }
+
+      const [_, userId] = match;
+      
+      await this.adminService.acceptCallsOrder(ctx, userId);
+    
+    } catch (error) {
+      console.error('Error in admin_accept_inviting:', error);
+      await ctx.answerCbQuery('Произошла ошибка').catch(console.error);
+    }
+  }
 }
 
 //:${user.id}

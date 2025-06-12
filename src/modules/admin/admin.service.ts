@@ -8,6 +8,7 @@ import { UserBotsService } from 'src/user-bots/user-bots.service';
 import { ExelService } from '../Exel-Module/exelModule.service';
 import { Context } from 'telegraf';
 import { RedisService } from 'src/core/redis/redis.service';
+import { SceneContext } from 'telegraf/scenes';
 
 @Injectable()
 export class AdminService {
@@ -144,6 +145,37 @@ export class AdminService {
         await this.telegramBotService.sendMessageWithButtonAction(Number(manager.telegramId), message, 'Принять', `admin_accept_inviting:${user.id}`);
     }
 
+    async sendAdminCallingOrder(userName:string, text:string, leads:any[]) {
+
+        const user = await this.usersService.getUserByName(userName);
+
+        const manager = await this.getRandomManager();
+
+        if(!manager) {
+            return;
+        }
+
+        const message = `
+            Пользователь ${user.username}
+            Создал заявку на обзвон роботом
+            Текст для обзвона: ${text}
+            Колличество лидов: ${leads.length}
+        `
+
+        console.log(`action: admin_inviting_calls:${String(user.telegramId)}}`);
+
+        await this.redisService.set(`admin_accept_calls:${user.telegramId}`, JSON.stringify({
+            leads: leads,
+            username: userName,
+            telegramId: String(user.telegramId),
+            text,
+        }));
+
+        console.log(`admin_calls_order:${user.id}`);
+        console.log(manager)
+        await this.telegramBotService.sendMessageWithButtonAction(Number(manager.telegramId), message, 'Принять', `admin_accept_calls:${user.telegramId}`);
+    }
+
     async acceptInviting(userId:string) {
         
         const data = await this.redisService.get(`admin_inviting_order:${userId}`);
@@ -236,5 +268,17 @@ export class AdminService {
 
     async changeTariff(username:string, tariff:string) {
         await this.usersService.updateUser(username, {rate: tariff as 'default' | 'pro'});
+    }
+
+    async acceptCallsOrder(ctx:Context & SceneContext, userId) {
+        const callInfo = await this.redisService.get(`admin_accept_calls:${userId}`);
+
+        console.log(callInfo)
+
+        ctx.session['admin_set_call_name'] = {
+            callInfo: JSON.parse(callInfo)
+          }
+      
+          return ctx.scene.enter('admin_set_call_name');
     }
 }

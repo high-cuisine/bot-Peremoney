@@ -78,4 +78,15 @@ export class OrdersService {
 
         await this.telegramBotService.sendMessage(Number(user.telegramId), `Новый клиент после обзвона роботом: ${phone}`);
     }
+
+    async createCallsOrder(companyName:string, telegramId:number) {
+        const user = await this.usersService.getUserByTelegramId(telegramId)
+        await this.prisma.usersCallOrder.create({
+            data: {
+                userId:user.id,
+                companyName
+            }
+        })
+        console.log(2)
+    }
 }

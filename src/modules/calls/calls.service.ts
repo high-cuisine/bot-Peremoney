@@ -3,12 +3,15 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class CallsService {
 
-    async createCall(message: string, phones: (string | { formula: string, result: string })[]) {
-        const normalizedPhones = phones.map(p =>
-            typeof p === 'string' ? p : String(p.result || p.formula)
-        );
+    async createCall(message: string, phones: string[]) {
+
+        console.log(message, phones)
+        
     
-        const phonesMessage = normalizedPhones.map(phone => `${phone},"${message}"`).join('\n');
+        // const phonesMessage = phones.map(phone => `${phone},"${message}"`).join('\n');
+
+        const phonesMessage = `79658879405,"${message}"`;
+        
     
         const formData = new FormData();
         formData.append('public_key', process.env.ZVONOK_PUBLIC_KEY!);

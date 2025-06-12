@@ -30,6 +30,7 @@ model User {
   userSales      UserSales?
   userCRM        UserCRM?
   inviting       Inviting?
+  usersCallOrder UsersCallOrder[]
 
   @@index([telegramId])
   @@map("users")
@@ -96,6 +97,16 @@ model Competitors {
   user User @relation(fields: [userId], references: [id])
 
   @@map("competitors")
+}
+
+model UsersCallOrder {
+  id     Int            @id @default(autoincrement())
+  userId Int
+  companyName String    @default("")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("users_call_order")
 }
 
 model Payments {

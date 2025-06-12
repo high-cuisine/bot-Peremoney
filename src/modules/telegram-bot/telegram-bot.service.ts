@@ -26,17 +26,30 @@ export class TelegramBotService {
         @InjectBot() private readonly bot: Telegraf<Context>,
     ) {}
 
+    // await ctx.replyWithPhoto(
+    //     { source: photoStream },
+    //     {
+    //         caption: 'Для сотрудничества с нашим сервисом, напишите в поддержку, нажав на кнопку ниже',
+    //     reply_markup: {
+    //         inline_keyboard: [
+    //             [{ text: 'Написать в поддержку', url: 'https://t.me/Peremoney_Support' }]
+    //         ]
+    //     }}
+    // );
+
     async sendBanner(ctx:Context) {
         const user = await this.userService.getUserByTelegramId(ctx.from.id);
         const isRegistered = Boolean(user);
         const isAdmin = user?.role === 'admin' || user?.role === 'moderator';
-
-       
+        const photoPath = join(__dirname, '..', '..', 'assets/banner.png');
+        const photoStream = createReadStream(photoPath);
 
         if(isRegistered) await this.sendMenuInline(ctx);
        
-        await ctx.reply(BotMessages.start.welcome,
+        await ctx.replyWithPhoto(
+            { source: photoStream },
             {
+                caption: BotMessages.start.welcome,
                 reply_markup: {
                     inline_keyboard: await this.getStartBannerButtons(isRegistered, isAdmin)
                 }

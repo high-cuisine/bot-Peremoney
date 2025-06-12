@@ -7,6 +7,8 @@ import { AnonymizationModule } from '../anonymization/anonymization.module';
 import { UserBotsModule } from 'src/user-bots/user-bots.module';
 import { ExelModule } from '../Exel-Module/exelModule.module';
 import { RedisModuleCustom } from 'src/core/redis/redis.module';
+import { SetCallsCompanyNameScene } from '../telegram-bot/scenes/admin/orders-management/set-call-name.scene copy';
+import { CallsModule } from '../calls/calls.module';
 
 @Module({
   imports: [
@@ -15,9 +17,10 @@ import { RedisModuleCustom } from 'src/core/redis/redis.module';
     AnonymizationModule,
     UserBotsModule,
     ExelModule,
-    RedisModuleCustom
+    RedisModuleCustom,
+    CallsModule
   ],
-  providers: [AdminService],
+  providers: [AdminService, SetCallsCompanyNameScene],
   exports: [AdminService]
 })
 export class AdminModule {}
