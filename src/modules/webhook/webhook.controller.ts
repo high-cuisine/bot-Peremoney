@@ -23,7 +23,7 @@ export class WebhookController {
 
     this.logger.log(`📞 Новый postback от номера: ${phone}`);
     this.logger.log(`ℹ️  Статус: ${status}, , ID звонка: ${company}`);
-    this.logger.log(body);
+    this.logger.log('body');
 
     await this.ordersService.notifyUserByCompany(String(company), String(status), String(phone));
     // Дополнительно: можно здесь вызывать сервис для сохранения в БД или триггера

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from 'src/core/prisma/Prisma.service';
 import { RedisService } from 'src/core/redis/redis.service';
 import { UsersService } from './users.service';
@@ -11,6 +11,7 @@ export class OrdersService {
         private readonly prisma: PrismaService,
         private readonly redis: RedisService,
         private readonly usersService: UsersService,
+        @Inject(forwardRef(() => TelegramBotService))
         private readonly telegramBotService: TelegramBotService
     ) {}
 
@@ -67,7 +68,7 @@ export class OrdersService {
         this.logger.log(companyPhone, status, phone, 'уведомление');
         const leadGeneration = await this.prisma.leadGeneration.findFirst({
             where: {
-                companyNameForCalling:companyPhone
+                companyNameForCalling: companyPhone
             }
         });
         if (!leadGeneration) return;
