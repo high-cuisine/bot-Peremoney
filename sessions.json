@@ -242,10 +242,7 @@
     {
       "id": "6711792303:6711792303",
       "data": {
-        "__scenes": {
-          "current": "sms_mailing",
-          "state": {}
-        },
+        "__scenes": {},
         "register": {
           "step": "confirmation",
           "name": "Николай",
