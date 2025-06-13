@@ -146,14 +146,19 @@ export class TelegramBotService {
 
 
         if(status) {
-            const file = createReadStream(join(__dirname, '..', '..', 'assets/instruction_.pdf'));
+            
             await this.userService.setFreeLeads(ctx.from.id);
             await ctx.reply(BotMessages.subscription.success,
                 Markup.inlineKeyboard([
                     [{ text: 'Обратно в меню', callback_data: 'start' }]
                 ])
             );
-            await this.bot.telegram.sendDocument(ctx.from.id, { source: file  });
+            const file = createReadStream(join(__dirname, '..', '..', 'assets/instruction.docx'));
+            await this.userService.setFreeLeads(ctx.from.id);
+            await this.bot.telegram.sendDocument(ctx.from.id, { 
+                source: file, 
+                filename: 'instruction.docx'
+            });
         } else {
             await ctx.reply(BotMessages.subscription.error);
         }
