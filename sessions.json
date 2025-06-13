@@ -3,10 +3,7 @@
     {
       "id": "1042650482:1042650482",
       "data": {
-        "__scenes": {
-          "current": "lead_generation",
-          "state": {}
-        },
+        "__scenes": {},
         "register": {
           "step": "confirmation",
           "name": "Александр",
