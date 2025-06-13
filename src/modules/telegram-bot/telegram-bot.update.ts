@@ -327,7 +327,7 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
 
   @Hears('settings')
   @Hears('Инструкция')
-  @Action('settings')
+  @Action('instruction')
   async onSettingsCabinet(@Ctx() ctx: Context & SceneContext) {
     await this.telegramBotService.sendInstruction(ctx);
   }

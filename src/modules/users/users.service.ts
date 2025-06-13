@@ -175,6 +175,10 @@ export class UsersService {
         }
         await this.prisma.userCRM.create({data: {userId: user.id, apiKey, crmType}})
     }
+
+    async getSalles(telegramId:number) {
+        const user = this.prisma.user.findFirst({where: {telegramId}})
+    }
 }
 
 
