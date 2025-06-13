@@ -3,7 +3,10 @@
     {
       "id": "1042650482:1042650482",
       "data": {
-        "__scenes": {},
+        "__scenes": {
+          "current": "lead_generation",
+          "state": {}
+        },
         "register": {
           "step": "confirmation",
           "name": "Александр",
@@ -17,12 +20,7 @@
           "step": "sites"
         },
         "leadGeneration": {
-          "step": "launch",
-          "sites": [],
-          "numbers": [],
-          "time_period": "1_month",
-          "max_leads": 6,
-          "day_leads_limit": 8
+          "step": "sites"
         },
         "sendUserExelDeAnonymization": {
           "step": "documentId",
@@ -254,10 +252,7 @@
     {
       "id": "6711792303:6711792303",
       "data": {
-        "__scenes": {
-          "current": "load_crm",
-          "state": {}
-        },
+        "__scenes": {},
         "register": {
           "step": "confirmation",
           "name": "Николай",
@@ -320,7 +315,8 @@
         },
         "load_crm": {
           "step": "key",
-          "type": "amo"
+          "type": "amo",
+          "key": "/start"
         }
       }
     },

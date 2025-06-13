@@ -25,6 +25,7 @@ export class BotUpdate {
   }
 
   @Start()
+  @Hears('Обновить бота')
   @Action('start')
   async onStart(@Ctx() ctx: Context) {
     await this.telegramBotService.sendBanner(ctx);
@@ -328,7 +329,7 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
   @Hears('Инструкция')
   @Action('settings')
   async onSettingsCabinet(@Ctx() ctx: Context & SceneContext) {
-    await this.telegramBotService.sendCompetitors(ctx);
+    await this.telegramBotService.sendInstruction(ctx);
   }
 
   @Hears('Задать вопрос')
@@ -512,6 +513,7 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
     await ctx.scene.enter('load_crm');
   }
 
+  
   @Action('tools_robot')
   async onToolsRobot(@Ctx() ctx: Context & SceneContext) {
     ctx.session['start_calling'] = {

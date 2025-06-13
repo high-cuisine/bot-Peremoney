@@ -189,6 +189,12 @@ export class TelegramBotService {
         });
     }
 
+    async sendInstruction(ctx:Context) {
+        const file = createReadStream(join(__dirname, '..', '..', 'assets/instruction.pdf'));
+            await this.userService.setFreeLeads(ctx.from.id);
+            await this.bot.telegram.sendDocument(ctx.from.id, { source: file  });
+    }
+
     async getMenuButtons(): Promise<InlineKeyboardButton[][]> {
         return [
             [{ text: 'Баланс', callback_data: 'balance' }], 
@@ -196,7 +202,7 @@ export class TelegramBotService {
             [{ text: 'Задать вопрос', url: 'https://t.me/Peremoney_Support' }],
             [{ text: 'Перехват лидов', callback_data: 'lead_generation' }],
             [{ text: 'Инструменты', callback_data: 'tools' }],
-            [{ text: 'Инструкция', callback_data: 'settings' }],
+            [{ text: 'Инструкция', callback_data: 'instruction' }],
             [{ text: 'Обновить бота', callback_data: 'start' }],
             [{ text: 'Партнерская программа', callback_data: 'partner_program' }],
             [{ text: 'Реферальная программа', callback_data: 'referral_program' }]
@@ -213,7 +219,6 @@ export class TelegramBotService {
 
     async getToolsMenuButtons() {
         return [
-            [{ text: 'Инструкция по работе', callback_data: 'tools_instruction' }],
             [{ text: 'Рассылки в Telegram', callback_data: 'tools_telegram' }],
             [{ text: 'Обзвон роботом', callback_data: 'tools_robot' }],
             [{ text: 'Инвайтинг в Телеграм', callback_data: 'tools_inviting' }],

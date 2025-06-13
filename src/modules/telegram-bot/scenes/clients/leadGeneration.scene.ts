@@ -51,7 +51,7 @@ export class LeadGenerationScene {
     session.step = 'numbers';
     session.sites = [];
     
-    await ctx.reply('Введите список номеров телефонов через запятую:', {
+    await ctx.reply('Введите список номеров телефонов без запятых в столбик:', {
       reply_markup: {
         inline_keyboard: [
           [{ text: BotMessages.leadGeneration.buttons.skip, callback_data: 'skip_numbers' }]
@@ -94,7 +94,7 @@ export class LeadGenerationScene {
     switch (session.step) {
       case 'sites':
         console.log(text);
-        session.sites = text.split('\n').map(site => site.trim()).filter(site => site);
+        session.sites = text.trim().split('\n').join(', ');
         session.step = 'numbers';
         await ctx.reply('Введите список номеров телефонов (каждый с новой строки):', {
           reply_markup: {
@@ -106,7 +106,7 @@ export class LeadGenerationScene {
         break;
 
       case 'numbers':
-        session.numbers = text.split('\n').map(number => number.trim()).filter(number => number);
+        session.numbers = text.str.trim().split('\n').join(', ');
         session.step = 'period';
         await ctx.reply(BotMessages.leadGeneration.selectPeriod, {
           reply_markup: {
