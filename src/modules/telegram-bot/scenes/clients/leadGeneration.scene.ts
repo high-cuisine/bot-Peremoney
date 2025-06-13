@@ -16,7 +16,7 @@ interface LeadGenerationSession {
   time_period?: '1_day' | '1_week' | '1_month'
   max_leads?: number
   day_leads_limit?: number
-  step: 'sites' | 'numbers' | 'offer' | 'period' | 'limits' | 'daily_limits' | 'launch'
+  step: 'sites' | 'numbers' | 'period' | 'limits' | 'daily_limits' | 'launch'
 }
 
 @Injectable()
@@ -31,7 +31,7 @@ export class LeadGenerationScene {
   @SceneEnter()
   async onSceneEnter(@Ctx() ctx: SceneContext) {
     await ctx.reply(BotMessages.leadGeneration.welcome);
-    await ctx.reply('Введите список сайтов через запятую:', {
+    await ctx.reply('Введите список сайтов каждый с новой строки:', {
       reply_markup: {
         inline_keyboard: [
           [{ text: BotMessages.leadGeneration.buttons.skip, callback_data: 'skip_sites' }]
@@ -63,13 +63,17 @@ export class LeadGenerationScene {
   @Action('skip_numbers')
   async onSkipNumbers(@Ctx() ctx: SceneContext) {
     const session = ctx.session['leadGeneration'] as LeadGenerationSession;
-    session.step = 'offer';
+    session.step = 'period';
     session.numbers = [];
     
-    await ctx.reply(BotMessages.leadGeneration.offerAgreement, {
+    await ctx.reply(BotMessages.leadGeneration.selectPeriod, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: BotMessages.leadGeneration.buttons.agree, callback_data: 'agree_offer' }]
+          [
+            { text: BotMessages.leadGeneration.buttons.oneDay, callback_data: 'period_1_day' },
+            { text: BotMessages.leadGeneration.buttons.oneWeek, callback_data: 'period_1_week' }
+          ],
+          [{ text: BotMessages.leadGeneration.buttons.oneMonth, callback_data: 'period_1_month' }]
         ]
       }
     });
@@ -103,11 +107,15 @@ export class LeadGenerationScene {
 
       case 'numbers':
         session.numbers = text.split('\n').map(number => number.trim()).filter(number => number);
-        session.step = 'offer';
-        await ctx.reply(BotMessages.leadGeneration.offerAgreement, {
+        session.step = 'period';
+        await ctx.reply(BotMessages.leadGeneration.selectPeriod, {
           reply_markup: {
             inline_keyboard: [
-              [{ text: BotMessages.leadGeneration.buttons.agree, callback_data: 'agree_offer' }]
+              [
+                { text: BotMessages.leadGeneration.buttons.oneDay, callback_data: 'period_1_day' },
+                { text: BotMessages.leadGeneration.buttons.oneWeek, callback_data: 'period_1_week' }
+              ],
+              [{ text: BotMessages.leadGeneration.buttons.oneMonth, callback_data: 'period_1_month' }]
             ]
           }
         });

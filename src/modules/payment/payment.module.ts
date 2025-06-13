@@ -4,9 +4,10 @@ import { PaymentService } from './payment.service';
 import { PaymentController } from './payment.controller';
 import { PrismaModule } from '../../core/prisma/prisma.module';
 import { AdminModule } from '../admin/admin.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [ConfigModule, PrismaModule, forwardRef(() => AdminModule)],
+  imports: [ConfigModule, PrismaModule, forwardRef(() => UsersModule), forwardRef(() => AdminModule)],
   controllers: [PaymentController],
   providers: [PaymentService],
   exports: [PaymentService]

@@ -12,6 +12,10 @@ export class MailingService {
         private readonly prisma: PrismaService
     ) {}
 
+    async setInvitingOrder(ctx: Context, groupName:string) {
+        
+    }
+
     async startInviating(userId:number, groupName:string, botId:number) {
         const inviting = await this.prisma.inviting.create({
             data: {

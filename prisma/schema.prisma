@@ -115,6 +115,7 @@ model Payments {
   amount Int
   Hash   String
   status PaymentsStatus @default(pending)
+  type   PaymentType    @default(replenishment)
 
   user User @relation(fields: [userId], references: [id])
 
@@ -182,4 +183,10 @@ enum PaymentsStatus {
 enum CRMType {
   amo
   bitrix
+}
+
+enum PaymentType {
+  replenishment
+  pro
+  premium
 }

@@ -228,7 +228,7 @@ export class TelegramBotService {
             [{ text: 'Мои лиды', callback_data: 'my_leads' }],
             [{ text: 'Мои заказы', callback_data: 'my_orders' }],
             [{ text: 'Мои средства', callback_data: 'my_balance' }],
-            [{ text: 'Настройки', callback_data: 'settings' }],
+            [{ text: 'Мои конкуренты', callback_data: 'settings' }],
             [{ text: 'Начать перехват лидов', callback_data: 'start_lead_generation' }]
         ]
     }
@@ -254,9 +254,25 @@ export class TelegramBotService {
     }
 
     async sendTariffPro(ctx:Context) {
-        await ctx.reply('симуляция платежа и обновление тарифа');
+        const amount = 2990
+        await this.paymentService.createPayment(ctx.from.id, amount, 'pro');
 
-        await this.userService.updateUserRate(ctx.from.id, 'pro');
+        const sale = await this.paymentService.findSale(ctx.from.id);
+
+        const price = sale ? amount * sale.amount : amount;
+
+        const finalPrice = Math.floor(price / 179 * 100);
+
+        await ctx.sendInvoice({
+            title: `Покупка тарифа pro за ${price} RUB`,
+            description: `Покупка тарифа pro в боте за ${price} рублей`,
+            payload: "${payment._id}",
+            currency: 'XTR',
+            prices: [{ label: 'XTR', amount: finalPrice }],
+            provider_token: '',
+        });
+
+        //await this.userService.updateUserRate(ctx.from.id, 'pro');
     }
 
     async sendLeadsMenu(ctx:Context) {
@@ -538,7 +554,7 @@ export class TelegramBotService {
 
     async sendInvoice(ctx:Context, amount:number) {
 
-        await this.paymentService.createPayment(ctx.from.id, amount / 70);
+        await this.paymentService.createPayment(ctx.from.id, amount / 70, 'replenishment');
 
         const sale = await this.paymentService.findSale(ctx.from.id);
 

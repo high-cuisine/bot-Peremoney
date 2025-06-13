@@ -47,7 +47,7 @@
           "step": "instructions"
         },
         "startMailing": {
-          "step": "excel_file",
+          "step": "instructions",
           "message": "тест"
         },
         "sms_mailing": {
@@ -84,15 +84,13 @@
           "quantity": 3
         },
         "load_crm": {
-          "step": "key",
-          "type": "amo",
-          "key": "7"
+          "step": "type"
         },
         "start_calling": {
           "step": "instructions"
         },
         "startCalling": {
-          "step": "confirmation",
+          "step": "instructions",
           "callText": "67goyuvbhl;njblvckxjrtckvlb",
           "phoneNumbers": [
             "79152424504",

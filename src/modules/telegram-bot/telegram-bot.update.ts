@@ -337,7 +337,7 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
     await ctx.reply('Напишите Ваш вопрос в поддержку', {
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Написать в поддержку', url: 'https://t.me/Peremoney_Support' }]
+          [{ text: 'Поддержка', url: 'https://t.me/Peremoney_Support' }]
         ]
       }
     });
