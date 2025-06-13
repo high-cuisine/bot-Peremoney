@@ -6,6 +6,7 @@ import { Markup } from 'telegraf'
 import { SceneContext } from 'telegraf/typings/scenes'
 import { BotMessages } from '../../messages/messages'
 import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper'
+import { PaymentService } from 'src/modules/payment/payment.service'
 
 interface BuyingLeadsSession {
   step: 'quantity' | 'payment'
@@ -17,7 +18,8 @@ interface BuyingLeadsSession {
 export class BuyingLeadsScene {
   constructor(
     private adminService: AdminService,
-    private userService: UsersService
+    private userService: UsersService,
+    private paymentService: PaymentService  
   ) {}
 
   @SceneEnter()
@@ -58,7 +60,8 @@ export class BuyingLeadsScene {
         session.step = 'payment'
         
         // Расчет стоимости
-        const price = quantity * 70 // Пример расчета: 100 рублей за лид
+        const sale = await this.paymentService.findSale(ctx.from.id);
+        const price = quantity * sale // Пример расчета: 100 рублей за лид
         
         await ctx.replyWithHTML(
           `📝 Проверьте детали заказа:\n\n` +

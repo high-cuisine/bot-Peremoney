@@ -30,7 +30,9 @@ export class PaymentService {
             }
         });
 
-        return sale;
+        if(!sale) return 70
+
+        return sale.amount;
     }
 
     async createPayment(userId: number, amount: number, type: 'replenishment' | 'pro' | 'premium') {

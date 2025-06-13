@@ -552,6 +552,12 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
       await ctx.answerCbQuery('Произошла ошибка').catch(console.error);
     }
   }
+
+  @Hears('Мои конкуренты')
+  @Action('my_concurents')
+  async sendCompetitors(ctx:Context) {
+    await this.telegramBotService.sendCompetitors(ctx);
+  }
 }
 
 //:${user.id}

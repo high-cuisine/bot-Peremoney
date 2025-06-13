@@ -189,10 +189,13 @@ export class TelegramBotService {
         });
     }
 
-    async sendInstruction(ctx:Context) {
+    async sendInstruction(ctx: Context) {
         const file = createReadStream(join(__dirname, '..', '..', 'assets/instruction.docx'));
-            await this.userService.setFreeLeads(ctx.from.id);
-            await this.bot.telegram.sendDocument(ctx.from.id, { source: file  });
+        await this.userService.setFreeLeads(ctx.from.id);
+        await this.bot.telegram.sendDocument(ctx.from.id, { 
+            source: file, 
+            filename: 'instruction.docx'
+        });
     }
 
     async getMenuButtons(): Promise<InlineKeyboardButton[][]> {
@@ -233,7 +236,7 @@ export class TelegramBotService {
             [{ text: 'Мои лиды', callback_data: 'my_leads' }],
             [{ text: 'Мои заказы', callback_data: 'my_orders' }],
             [{ text: 'Мои средства', callback_data: 'my_balance' }],
-            [{ text: 'Мои конкуренты', callback_data: 'settings' }],
+            [{ text: 'Мои конкуренты', callback_data: 'my_concurents' }],
             [{ text: 'Начать перехват лидов', callback_data: 'start_lead_generation' }]
         ]
     }
@@ -259,12 +262,10 @@ export class TelegramBotService {
     }
 
     async sendTariffPro(ctx:Context) {
-        const amount = 2990
-        await this.paymentService.createPayment(ctx.from.id, amount, 'pro');
+        const price = 2990
+        await this.paymentService.createPayment(ctx.from.id, price, 'pro');
 
-        const sale = await this.paymentService.findSale(ctx.from.id);
 
-        const price = sale ? amount * sale.amount : amount;
 
         const finalPrice = Math.floor(price / 179 * 100);
 
@@ -442,10 +443,12 @@ export class TelegramBotService {
 
     async sendCompetitors(ctx:Context) {
         const competitors = await this.userService.getCompetitors(ctx.from.id);
+
+        console.log(competitors)
         
         await ctx.reply(`Ваши конкуренты:
-            сайты: ${competitors.map(competitor => competitor.webSite).join(',')}
-            номера: ${competitors.map(competitor => competitor.phone).join(',')}
+            сайты: ${competitors.filter(el => el.webSite !== '').map(competitor => competitor.webSite)}
+            номера: ${competitors.filter(el => el.phone !== '').map(competitor => competitor.phone)}
         `);
     }
 
@@ -563,7 +566,7 @@ export class TelegramBotService {
 
         const sale = await this.paymentService.findSale(ctx.from.id);
 
-        const price = sale ? amount * sale.amount : amount;
+        const price = sale ? amount / 70 * sale : amount;
 
         const finalPrice = Math.floor(price / 179 * 100);
 

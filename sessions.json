@@ -76,7 +76,7 @@
         },
         "buying_leads": {
           "step": "payment",
-          "quantity": 3
+          "quantity": 1
         },
         "load_crm": {
           "step": "type"
