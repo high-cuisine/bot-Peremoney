@@ -32,8 +32,27 @@ export class WebhookController {
   }
 
   @Post('leads')
-  async setLeads(@Body() body: any) {
-    console.log(body);
+  async setLeads(@Body() dmpDTO: DmpDTO) {
+    console.log(dmpDTO);
     return { success: true };
   }
 }
+
+
+// {
+//   phone: '79990000000',
+//   timestamp: 1749961585,
+//   website: 'dmp.one',
+//   page: 'https://dmp.one/',
+//   page_with_parameters: 'https://dmp.one/?yclid=3725717487900465674',
+//   yid: 'yeUUfxApgXckWntCxYGj',
+//   utm_source: 'yandex_ibr',
+//   utm_medium: 'cpc',
+//   utm_campaign: 'utm_кампания|22964259',
+//   utm_term: 'utm_терм',
+//   utm_content: 'k50id|0100000011125291681_|cid|22964259|gid|2957028098|aid|4832745869|adp|no|pos|premium1|src|search_none|dvc|desktop|main',
+//   referer: 'https://yandex.ru/',
+//   ip: '127.0.0.1',
+//   stock_key: '1a79a4d60de6718e8e5b326e338ae533',
+//   visit__id: 123123
+// }
