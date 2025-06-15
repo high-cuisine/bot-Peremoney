@@ -22,7 +22,7 @@ export class LeadsService {
             data: {
                 phone: dmpDTO.phone,
                 telegramId: usersInfo[0].id,
-                username: usersInfo[0].username,
+                username: usersInfo[0].username || "",
                 user: {
                     connect: {
                         id: Number(company.userId)
