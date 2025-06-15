@@ -82,7 +82,7 @@ model LeadGeneration {
 model UsersClients {
   id         Int    @id @default(autoincrement())
   userId     Int
-  companyId  Int    @unique
+  companyId  Int 
   phone      String
   username   String
   telegramId BigInt
