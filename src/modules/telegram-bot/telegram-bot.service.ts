@@ -204,15 +204,15 @@ import { PaymentService } from '../payment/payment.service';
 
     async getMenuButtons(): Promise<InlineKeyboardButton[][]> {
         return [
+            [{ text: 'Задать вопрос', url: 'https://t.me/Peremoney_Support' }],
             [{ text: 'Баланс', callback_data: 'balance' }], 
             [{ text: 'Подписка', callback_data: 'tarifs' }],
-            [{ text: 'Задать вопрос', url: 'https://t.me/Peremoney_Support' }],
             [{ text: 'Перехват лидов', callback_data: 'lead_generation' }],
             [{ text: 'Инструменты', callback_data: 'tools' }],
             [{ text: 'Инструкция', callback_data: 'instruction' }],
-            [{ text: 'Обновить бота', callback_data: 'start' }],
             [{ text: 'Партнерская программа', callback_data: 'partner_program' }],
-            [{ text: 'Реферальная программа', callback_data: 'referral_program' }]
+            [{ text: 'Реферальная программа', callback_data: 'referral_program' }],
+            [{ text: 'Обновить бота', callback_data: 'start' }],
         ];
     }
 
@@ -252,7 +252,7 @@ import { PaymentService } from '../payment/payment.service';
                 inline_keyboard: [
                     [{ text: 'Пополнить баланс', callback_data: 'top_up_balance_order' }],
                     [{ text: 'Купить подписку Pro', callback_data: 'tariff_pro' }],
-                    [{ text: 'Купить подписку Premium', callback_data: 'tariff_premium' }],
+                    //[{ text: 'Купить подписку Premium', callback_data: 'tariff_premium' }],
                 ]
             }
         });

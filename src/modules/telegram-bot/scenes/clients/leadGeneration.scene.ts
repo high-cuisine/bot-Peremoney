@@ -16,7 +16,8 @@ interface LeadGenerationSession {
   time_period?: '1_day' | '1_week' | '1_month'
   max_leads?: number
   day_leads_limit?: number
-  step: 'sites' | 'numbers' | 'period' | 'limits' | 'daily_limits' | 'launch'
+  company_name?: string
+  step: 'sites' | 'numbers' | 'period' | 'limits' | 'daily_limits' | 'company' | 'launch',
 }
 
 @Injectable()
@@ -63,20 +64,10 @@ export class LeadGenerationScene {
   @Action('skip_numbers')
   async onSkipNumbers(@Ctx() ctx: SceneContext) {
     const session = ctx.session['leadGeneration'] as LeadGenerationSession;
-    session.step = 'period';
+    session.step = 'company';
     session.numbers = [];
     
-    await ctx.reply(BotMessages.leadGeneration.selectPeriod, {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            { text: BotMessages.leadGeneration.buttons.oneDay, callback_data: 'period_1_day' },
-            { text: BotMessages.leadGeneration.buttons.oneWeek, callback_data: 'period_1_week' }
-          ],
-          [{ text: BotMessages.leadGeneration.buttons.oneMonth, callback_data: 'period_1_month' }]
-        ]
-      }
-    });
+    await ctx.reply('Введите название вашей компании:');
   }
 
   @On('text')
@@ -106,7 +97,13 @@ export class LeadGenerationScene {
         break;
 
       case 'numbers':
-        session.numbers = text.str.trim().split('\n').join(', ');
+        session.numbers = text.trim().split('\n').join(', ');
+        session.step = 'company';
+        await ctx.reply('Введите название вашей компании:');
+        break;
+
+      case 'company':
+        session.company_name = text.trim();
         session.step = 'period';
         await ctx.reply(BotMessages.leadGeneration.selectPeriod, {
           reply_markup: {
@@ -187,6 +184,8 @@ export class LeadGenerationScene {
     const session = ctx.session['leadGeneration'] as LeadGenerationSession;
     const user = await this.usersService.getUserByTelegramId(ctx.from.id);
 
+    const companyName = session.company_name + '.' + user.username;
+
     await this.adminService.sendLeadGenerationData(
       session.sites.join(','),
       session.numbers.join(','),
@@ -194,7 +193,8 @@ export class LeadGenerationScene {
       session.max_leads,
       session.day_leads_limit,
       user.username,
-      user.username
+      user.username,
+      companyName
     );
 
     
@@ -209,7 +209,8 @@ export class LeadGenerationScene {
       user.id,
       competitor.id,
       session.max_leads,
-      session.day_leads_limit
+      session.day_leads_limit,
+      companyName
     );
 
 

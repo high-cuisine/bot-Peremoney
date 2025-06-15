@@ -15,7 +15,7 @@ export class OrdersService {
         private readonly telegramBotService: TelegramBotService
     ) {}
 
-    async createLeadGeneration(userId: number, competitorId: number, maxCount: number, dailyCount: number) {
+    async createLeadGeneration(userId: number, competitorId: number, maxCount: number, dailyCount: number, companyName:string) {
         try {
             return await this.prisma.leadGeneration.create({
                 data: {
@@ -23,7 +23,7 @@ export class OrdersService {
                     competitorId,
                     maxCount,
                     dailyCount,
-                    projectName: ""
+                    projectName: companyName
                 }
             });
         } catch (error) {
