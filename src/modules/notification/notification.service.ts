@@ -33,6 +33,10 @@ export class NotifyService {
         });
     }
 
+    async sendNewLidsForUsers() {
+        
+    }
+
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: 'Europe/Moscow' })
     handleCron() {
         return this.sendUnActiveUsers();
@@ -43,8 +47,10 @@ export class NotifyService {
         return this.sendUnActiveUsers();
     }
 
-    @Cron(CronExpression.EVERY_DAY_AT_10PM, { timeZone: 'Europe/Moscow' })
+    @Cron(CronExpression.EVERY_DAY_AT_10AM, { timeZone: 'Europe/Moscow' })
     sendNewLids() {
-        return this.sendUnActiveUsers();
+        return this.sendNewLidsForUsers();
     }
+
+   
 }

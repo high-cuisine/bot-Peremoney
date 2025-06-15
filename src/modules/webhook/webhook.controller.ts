@@ -30,4 +30,10 @@ export class WebhookController {
 
     return { success: true };
   }
+
+  @Post('leads')
+  async setLeads(@Body() body: any) {
+    console.log(body);
+    return { success: true };
+  }
 }

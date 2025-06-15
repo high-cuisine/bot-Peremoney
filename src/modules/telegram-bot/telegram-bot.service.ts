@@ -154,7 +154,6 @@ export class TelegramBotService {
                 ])
             );
             const file = createReadStream(join(__dirname, '..', '..', 'assets/instruction.docx'));
-            await this.userService.setFreeLeads(ctx.from.id);
             await this.bot.telegram.sendDocument(ctx.from.id, { 
                 source: file, 
                 filename: 'instruction.docx'
