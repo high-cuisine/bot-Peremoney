@@ -21,7 +21,7 @@ export class LeadsService {
         await this.prisma.usersClients.create({
             data: {
                 phone: dmpDTO.phone,
-                telegramId: usersInfo[0].id,
+                telegramId: usersInfo[0].id || 0,
                 username: usersInfo[0].username || "",
                 user: {
                     connect: {
