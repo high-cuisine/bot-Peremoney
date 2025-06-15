@@ -44,7 +44,7 @@ export class AdminService {
         await this.telegramBotService.sendMessage(Number(randomManager.telegramId), message);
     }
 
-    async sendLeadGenerationData(fileIdSites:string, fileIdNumbers:string, timePeriod:string, maxLeads:number, dayLeadsLimit:number, userName:string, userLink:string) {
+    async sendLeadGenerationData(fileIdSites:string, fileIdNumbers:string, timePeriod:string, maxLeads:number, dayLeadsLimit:number, userName:string, userLink:string, companyName:string) {
         const adminMessage = `
             🆕 Новая заявка на генерацию лидов!
 
@@ -56,6 +56,7 @@ export class AdminService {
 
             Пользователь: ${userName}
             Ссылка на пользователя: ${userLink}
+            Название компании: ${companyName}
         `;
         let managers = await this.usersService.getUsersByRole('moderator');
         if (managers.length === 0) {
