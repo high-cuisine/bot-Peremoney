@@ -3,12 +3,14 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import { UsersService } from "../users/users.service";
 import { User } from "generated/prisma";
 import { TelegramBotService } from "../telegram-bot/telegram-bot.service";
+import { AutoSettingsService } from "../auto-settings/auto-settings.service";
 
 @Injectable()
 export class NotifyService {
     constructor(
         private readonly userService: UsersService,
-        private readonly telegramService: TelegramBotService
+        private readonly telegramService: TelegramBotService,
+        private readonly autoSettingsService: AutoSettingsService
     ) {
 
     }
@@ -33,9 +35,7 @@ export class NotifyService {
         });
     }
 
-    async sendNewLidsForUsers() {
-        
-    }
+  
 
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: 'Europe/Moscow' })
     handleCron() {
@@ -47,9 +47,10 @@ export class NotifyService {
         return this.sendUnActiveUsers();
     }
 
-    @Cron(CronExpression.EVERY_DAY_AT_10AM, { timeZone: 'Europe/Moscow' })
+    @Cron(CronExpression.EVERY_DAY_AT_11AM, { timeZone: 'Europe/Moscow' })
     sendNewLids() {
-        return this.sendNewLidsForUsers();
+        console.log('sendNewLids');
+        return this.autoSettingsService.startUsersAutomations();
     }
 
    

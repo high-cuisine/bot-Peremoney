@@ -1,12 +1,14 @@
 import { Body, Controller, Post, Logger, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { OrdersService } from '../users/orders.service';
+import { LeadsService } from '../leads/leads.service';
 
 @Controller('webhook')
 export class WebhookController {
   private readonly logger = new Logger(WebhookController.name);
   constructor(
-    private readonly ordersService: OrdersService
+    private readonly ordersService: OrdersService,
+    private readonly leadsService: LeadsService
   ) {}
 
   @Post('')
@@ -33,7 +35,7 @@ export class WebhookController {
 
   @Post('leads')
   async setLeads(@Body() dmpDTO: DmpDTO) {
-    console.log(dmpDTO);
+    await this.leadsService.saveLeads(dmpDTO);
     return { success: true };
   }
 }

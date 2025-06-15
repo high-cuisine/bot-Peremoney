@@ -18,11 +18,11 @@ export class UsersService {
     async saveClients(users: UsersDTO[], userId: number) {
         const usersCurrent = await this.prisma.usersClients.findMany({
             where: { userId: userId },
-            select: { phone: true, email: true } 
+            select: { phone: true} 
         });
 
         const existingUsers = new Set(
-            usersCurrent.map(u => `${u.phone}_${u.email}`)
+            usersCurrent.map(u => `${u.phone}`)
         );
 
         const dataUser = users
@@ -178,6 +178,22 @@ export class UsersService {
 
     async getSalles(telegramId:number) {
         const user = this.prisma.user.findFirst({where: {telegramId}})
+    }
+
+    async disableAuto(telegramId:number, projectName:string) {
+        const user = await this.prisma.user.findFirst({where: {telegramId}})
+        if(!user) {
+            return;
+        }
+        await this.prisma.leadGeneration.updateMany({where: {projectName: projectName, userId: user.id}, data: {auto: false}})
+    }  
+
+    async enableAuto(telegramId:number, projectName:string) {
+        const user = await this.prisma.user.findFirst({where: {telegramId}})
+        if(!user) {
+            return;
+        }
+        await this.prisma.leadGeneration.updateMany({where: {projectName: projectName, userId: user.id}, data: {auto: true}})
     }
 }
 

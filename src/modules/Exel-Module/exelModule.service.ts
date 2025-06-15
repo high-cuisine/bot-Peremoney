@@ -70,7 +70,13 @@ export class ExelService {
         const columns = Object.keys(data[0]).map(key => ({ header: key, key }));
         worksheet.columns = columns;
 
-        data.forEach(item => worksheet.addRow(item));
+        data.forEach(item => {
+            const rowData = {};
+            Object.keys(item).forEach(key => {
+                rowData[key] = String(item[key]);
+            });
+            worksheet.addRow(rowData);
+        });
 
         const buffer = await workbook.xlsx.writeBuffer();
         return buffer;

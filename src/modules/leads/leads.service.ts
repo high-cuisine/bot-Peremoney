@@ -11,34 +11,34 @@ export class LeadsService {
 
     async saveLeads(dmpDTO: DmpDTO) {
         const company = await this.prisma.leadGeneration.findFirst({where: {projectName: dmpDTO.website}})
-        // if(!company) {
-        //     return;
-        // }
+        if(!company) {
+            return;
+        }
 
         console.log(company, dmpDTO);
 
-        // const user = await this.prisma.user.findFirst({where: {id: company.userId}});
-
-        // if(!user) {
-        //     return;
-        // }
-
         const usersInfo = await this.userBotsService.getUsersInfoByPhones([dmpDTO.phone])
-
-        console.log(usersInfo);
-
-        // const lead = await this.prisma.lead.findFirst({where: {phone: dmpDTO.phone}})
-
-        // await this.prisma.usersClients.create({
-        //     data: {
-        //         userId: user.id,
-        //         companyId: company.id,
-        //         phone: dmpDTO.phone,
-        //         timestamp: dmpDTO.timestamp,
-        //         website: dmpDTO.website,
-        //         page: dmpDTO.page,
-        //         page_with_parameters: dmpDTO.page_with_parameters,
-        //     }
-        // })
+        await this.prisma.usersClients.create({
+            data: {
+                phone: dmpDTO.phone,
+                telegramId: usersInfo[0].id,
+                username: usersInfo[0].username,
+                user: {
+                    connect: {
+                        id: Number(company.userId)
+                    }
+                },
+                company: {
+                    connect: {
+                        id: company.id
+                    }
+                }
+            }
+        })
     }
 }
+
+
+// [
+//     { phone: '79658879405', username: 'high_cuisine', id: '1042650482' }
+//   ]

@@ -132,10 +132,14 @@ export class UserBotsService {
         let client: TelegramClient | null = null;
 
         try {
-            const sessionString = await this.redisService.srandmember("telegram:userbots");
+            let sessionString = await this.redisService.srandmember("telegram:userbots");
+    
             if (!sessionString) {
-                console.log("No session found in Redis");
-                return null;
+                sessionString = await this.login();
+                if (!sessionString) {
+                    console.log("Нет доступных аккаунтов");
+                    return null;
+                }
             }
 
             const stringSession = new StringSession(sessionString);

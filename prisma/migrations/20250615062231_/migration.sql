@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "users_clients" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

@@ -558,6 +558,36 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
   async sendCompetitors(ctx:Context) {
     await this.telegramBotService.sendCompetitors(ctx);
   }
+
+  @Action(/^enable_auto:.+$/)
+  async onEnableAuto(@Ctx() ctx: Context & any) {
+    const match = ctx.callbackQuery.data.match(/^enable_auto:(.+)$/);
+    if (!match) {
+      throw new Error('Invalid callback data format');
+    }
+
+    const [_, projectName] = match;
+    await this.telegramBotService.enableAuto(ctx, projectName);
+  }
+
+  @Action(/^disable_auto:.+$/)
+  async onDisableAuto(@Ctx() ctx: Context & any) {
+
+    const match = ctx.callbackQuery.data.match(/^disable_auto:(.+)$/);
+    if (!match) {
+      throw new Error('Invalid callback data format');
+    }
+
+    const [_, projectName] = match;
+
+    console.log(projectName);
+    await this.telegramBotService.disableAuto(ctx, projectName);
+  }
+
+  @Action('daily_use_tools')
+  async onDailyUseTools(@Ctx() ctx: Context & SceneContext) {
+    await this.telegramBotService.dailyUseTools(ctx);
+  }
 }
 
 //:${user.id}

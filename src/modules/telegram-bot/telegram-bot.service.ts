@@ -15,7 +15,7 @@ import { AdminService } from '../admin/admin.service';
 import { PaymentService } from '../payment/payment.service';
   
 @Injectable()
-export class TelegramBotService {
+    export class TelegramBotService {
 
     constructor(
         private readonly userService: UsersService,
@@ -436,6 +436,14 @@ export class TelegramBotService {
         });
     }
 
+    async sendMessageWithButtonActionArray(telegramId:number, message:string, buttonText:string[], callbackData:string[]) {
+        await this.bot.telegram.sendMessage(telegramId, message, {
+            reply_markup: {
+                inline_keyboard: buttonText.map((text, index) => [{text: text, callback_data: callbackData[index]}])
+            }
+        });
+    }
+
     async sendSmsMailing(ctx:Context & SceneContext) {
 
         ctx.session['sms_mailing'] = {
@@ -595,4 +603,26 @@ export class TelegramBotService {
     
         await this.bot.telegram.pinChatMessage(userId, message.message_id);
       }
+
+    async enableAuto(ctx:Context & SceneContext, projectName:string) {
+        await ctx.reply('Автоматизация включена');
+        await this.userService.enableAuto(ctx.from.id, projectName);
+    }
+
+    async disableAuto(ctx:Context & SceneContext, projectName:string) {
+        await ctx.reply('Автоматизация выключена');
+        await this.userService.disableAuto(ctx.from.id, projectName);
+    }
+    
+    async dailyUseTools(ctx:Context & SceneContext) {
+        await ctx.reply('Использование инструментов на этих лидах', {
+            reply_markup: {
+                inline_keyboard: [
+                    [{ text: 'Использовать обзвон', callback_data: 'start' }],
+                    [{ text: 'Использовать рассылку Telegram', callback_data: 'start' }],
+                    [{ text: 'Создать инвайтинг', callback_data: 'start' }],
+                ]
+            }
+        });
+    }
 }

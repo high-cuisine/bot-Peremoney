@@ -21,15 +21,15 @@ model User {
   isTakingFreeLeads Boolean   @default(false)
   isBanned          Boolean   @default(false)
 
-  clients        UsersClients[]
-  estimation     UsersEstimation[]
-  questions      UsersQuestion[]
-  competitors    Competitors[]
-  leadGeneration LeadGeneration[]
-  payments       Payments[]
-  userSales      UserSales?
-  userCRM        UserCRM?
-  inviting       Inviting?
+  clients           UsersClients[]
+  estimation        UsersEstimation[]
+  questions         UsersQuestion[]
+  competitors       Competitors[]
+  leadGeneration    LeadGeneration[]
+  payments          Payments[]
+  userSales         UserSales?
+  userCRM           UserCRM?
+  inviting          Inviting?
   usersCallOrder UsersCallOrder[]
 
   @@index([telegramId])
@@ -61,15 +61,20 @@ model UsersEstimation {
 
 model LeadGeneration {
   id           Int    @id @default(autoincrement())
-  competitorId Int
+  competitorId Int    
   userId       Int
   maxCount     Int
   dailyCount   Int
-  projectName  String @default("")
+  projectName  String       @default("")
+  auto              Boolean @default(false)
+  calling           Boolean @default(false)
+  telegramInviting  Boolean @default(false)
+  telegramMailing   Boolean @default(false)
   companyNameForCalling String?
 
-  user       User        @relation(fields: [userId], references: [id])
-  competitor Competitors @relation(fields: [competitorId], references: [id])
+  user            User        @relation(fields: [userId], references: [id])
+  competitor      Competitors @relation(fields: [competitorId], references: [id])
+  usersClients    UsersClients[]
 
   @@map("lead_generation")
 }
@@ -77,11 +82,15 @@ model LeadGeneration {
 model UsersClients {
   id         Int    @id @default(autoincrement())
   userId     Int
-  name       String
+  companyId  Int    @unique
   phone      String
-  email      String
+  username   String
   telegramId BigInt
+  processed  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
   user       User   @relation(fields: [userId], references: [id])
+  company    LeadGeneration   @relation(fields: [companyId], references: [id])
 
   @@map("users_clients")
 }
