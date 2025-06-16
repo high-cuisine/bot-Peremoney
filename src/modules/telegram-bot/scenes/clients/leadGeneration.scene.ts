@@ -186,9 +186,11 @@ export class LeadGenerationScene {
 
     const companyName = session.company_name + '.' + user.username;
 
+    console.log(String(session.sites).split('\n').join(','));
+
     await this.adminService.sendLeadGenerationData(
-      session.sites.join(','),
-      session.numbers.join(','),
+      String(session.sites).split('\n').join(','),
+      String(session.numbers).split('\n').join(','),
       session.time_period,
       session.max_leads,
       session.day_leads_limit,
@@ -201,8 +203,8 @@ export class LeadGenerationScene {
 
    const competitor = await this.usersService.createCompetitor(
       ctx.from.id,
-      session.sites.join(','),
-      session.numbers.join(',')
+      String(session.sites).split('\n').join(','),
+      String(session.numbers).split('\n').join(','),
     );
 
     await this.ordersService.createLeadGeneration(

@@ -17,7 +17,13 @@
           "step": "sites"
         },
         "leadGeneration": {
-          "step": "sites"
+          "step": "launch",
+          "sites": "wefwe, wefwe, wefwe, wefwe, wefwe",
+          "numbers": "wefwe, wefwe, wefwe, wefwe, wefwe, wefwe",
+          "company_name": "e",
+          "time_period": "1_month",
+          "max_leads": 2,
+          "day_leads_limit": 1
         },
         "sendUserExelDeAnonymization": {
           "step": "documentId",
@@ -122,8 +128,12 @@
         "__scenes": {},
         "register": {
           "step": "confirmation",
-          "name": "Maksim",
-          "phone": "+79658879405"
+          "name": "Максим",
+          "phone": "+79658879405",
+          "niche": "т",
+          "marketingBudget": "3000",
+          "cac": "0",
+          "ltv": "1"
         },
         "lead_generation": {
           "step": "sites"
@@ -422,6 +432,12 @@
     },
     {
       "id": "5556517806:5556517806",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "7171405334:7535290204",
       "data": {
         "__scenes": {}
       }
