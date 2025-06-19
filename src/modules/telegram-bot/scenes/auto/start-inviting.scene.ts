@@ -108,9 +108,7 @@ export class StartInvitingScene {
       const userNames = leadsData.map(lead => lead.name);
 
       //await this.adminService.sendAdminInvitingOrder(ctx.from.username, session.groupId, session.groupLink, userNames);
-
-      const userNames2 = ['Mmmmjoig', 'referfwes262525', 'vffffj']
-      await this.userBotsService.inviteGroupV2(userNames2, session.groupLink);
+      await this.userBotsService.inviteGroupV2(userNames, session.groupLink);
       await ctx.reply('Файл получен! Заявка создана');
       await ctx.scene.leave();
     }
