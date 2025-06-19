@@ -36,6 +36,11 @@ export class LeadsService {
             }
         })
     }
+
+    async getUserLeads(userId:number) {
+        const leads = await this.prisma.usersClients.findMany({where: {userId}});
+        return leads;
+    }
 }
 
 

@@ -195,6 +195,12 @@ export class UsersService {
         }
         await this.prisma.leadGeneration.updateMany({where: {projectName: projectName, userId: user.id}, data: {auto: true}})
     }
+
+    async getUserCompanyes(userId:number) {
+        const companyes = await this.prisma.leadGeneration.findMany({where:{userId}});
+
+        return companyes
+    }
 }
 
 

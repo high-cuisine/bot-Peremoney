@@ -13,6 +13,7 @@ import { SceneContext } from 'telegraf/typings/scenes';
 import { MailingService } from '../mailing/mailing.service';
 import { AdminService } from '../admin/admin.service';
 import { PaymentService } from '../payment/payment.service';
+import { LeadsService } from '../leads/leads.service';
   
 @Injectable()
     export class TelegramBotService {
@@ -23,6 +24,7 @@ import { PaymentService } from '../payment/payment.service';
         private readonly mailingService: MailingService,
         private readonly adminService: AdminService,
         private readonly paymentService: PaymentService,
+        private readonly leadsService: LeadsService,
         @InjectBot() private readonly bot: Telegraf<Context>,
     ) {}
 
@@ -158,6 +160,9 @@ import { PaymentService } from '../payment/payment.service';
                 source: file, 
                 filename: 'instruction.docx'
             });
+
+            const fileMap = createReadStream(join(__dirname, '..', '..', 'assets/map.png'));
+            await ctx.replyWithPhoto({ source: fileMap }, {caption: 'Как работает перехват'})
         } else {
             await ctx.reply(BotMessages.subscription.error);
         }
@@ -238,10 +243,8 @@ import { PaymentService } from '../payment/payment.service';
     async getLeadsMenuButtons() {
         return [
             [{ text: 'Мои лиды', callback_data: 'my_leads' }],
-            [{ text: 'Мои заказы', callback_data: 'my_orders' }],
-            [{ text: 'Мои средства', callback_data: 'my_balance' }],
-            [{ text: 'Мои конкуренты', callback_data: 'my_concurents' }],
-            [{ text: 'Начать перехват лидов', callback_data: 'start_lead_generation' }]
+            [{ text: 'Мои компании', callback_data: 'my_companys' }],
+            [{ text: 'Настроить перехват лидов', callback_data: 'start_lead_generation' }]
         ]
     }
 
@@ -624,5 +627,35 @@ import { PaymentService } from '../payment/payment.service';
                 ]
             }
         });
+    }
+
+    async sendLeads(ctx:Context) {
+        const user = await this.userService.getUserByTelegramId(ctx.from.id);
+        const leads = await this.leadsService.getUserLeads(user.id);
+        
+        const file = await this.exelService.exportToExcelBuffer(leads.map(el => {
+           return {telgramId: el.telegramId, username: el.username, phone:el.phone}  
+           
+        })) as any;
+
+        await ctx.replyWithDocument(
+            { source: file, filename: 'users.xlsx' },
+            { caption: 'Вот ваш Excel файл 📊' } 
+        );
+    }
+
+    async sendCompanyes(ctx:Context) {
+        const user = await this.userService.getUserByTelegramId(ctx.from.id);
+        const companyes = await this.userService.getUserCompanyes(user.id);
+
+        const file = await this.exelService.exportToExcelBuffer(companyes.map(el => {
+            return {name: el.projectName}  
+            
+         })) as any;
+ 
+         await ctx.replyWithDocument(
+             { source: file, filename: 'company.xlsx' },
+             { caption: 'Вот ваш Excel файл 📊' } 
+         );
     }
 }

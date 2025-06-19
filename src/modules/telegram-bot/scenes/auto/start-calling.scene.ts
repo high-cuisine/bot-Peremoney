@@ -86,6 +86,7 @@ export class StartCallingScene {
 
   @On('document')
   async onDocument(@Ctx() ctx: SceneContext) {
+    console.log('onDocument');
     const session = ctx.session['startCalling'] as StartCallingSession;
     
     if (session.step === 'excel_file') {

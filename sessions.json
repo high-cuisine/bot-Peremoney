@@ -3,7 +3,10 @@
     {
       "id": "1042650482:1042650482",
       "data": {
-        "__scenes": {},
+        "__scenes": {
+          "current": "lead_generation",
+          "state": {}
+        },
         "register": {
           "step": "confirmation",
           "name": "Александр",
@@ -18,12 +21,12 @@
         },
         "leadGeneration": {
           "step": "launch",
-          "sites": "wefwe, wefwe, wefwe, wefwe, wefwe",
-          "numbers": "wefwe, wefwe, wefwe, wefwe, wefwe, wefwe",
+          "sites": "ef, ff, fw",
+          "numbers": "34, 23, 23",
           "company_name": "e",
-          "time_period": "1_month",
+          "region": "w",
           "max_leads": 2,
-          "day_leads_limit": 1
+          "day_leads_limit": 2
         },
         "sendUserExelDeAnonymization": {
           "step": "documentId",
@@ -40,9 +43,16 @@
           "step": "instructions"
         },
         "startInviting": {
-          "step": "instructions",
-          "groupLink": "https://t.me/testchannel23325",
-          "groupId": "12"
+          "step": "excel_file",
+          "groupLink": "https://t.me/uiuiu123qwerty",
+          "groupId": "43",
+          "userbot": {
+            "id": 2,
+            "username": "Titus2uiui",
+            "session": "1BQANOTEuMTA4LjU2LjExMgG7ci69qeEAg3RdADAWEDxSc1mYHaLo0ur4PdBG6Z7mz5Z19O0O3AFOSWlGytqtGYwENpJd5WZg7fkM61+SQ7an5cV6npIELi+BCSrQbe1i1Y/adlvinG0uCt3z6qxGEjOglMaYkMexl+AquwdoyaD6ni/efHRX8s36sYdRI2yBvPry9T9R3MZxdJ6/9sZYEbyhqeC9OxOsABry0CzzTBC+7GTsAk184gPUJ/W6tffLi2OHrgZP5DSfMfuB+1x1O2b5VDazMTwG1S/khIWlRITduC82qeKUFu/aDS0X7Qc03xdAkyQz4msJLtLgJ+suKwCOJHqOlEmoskkmdd1HsR2A/w==",
+            "phone": null,
+            "password": null
+          }
         },
         "start_mailing": {
           "step": "instructions"
@@ -128,12 +138,12 @@
         "__scenes": {},
         "register": {
           "step": "confirmation",
-          "name": "Максим",
+          "name": "ewwe",
           "phone": "+79658879405",
-          "niche": "т",
-          "marketingBudget": "3000",
-          "cac": "0",
-          "ltv": "1"
+          "niche": "wef",
+          "marketingBudget": "we",
+          "cac": "23",
+          "ltv": "2"
         },
         "lead_generation": {
           "step": "sites"
@@ -438,6 +448,27 @@
     },
     {
       "id": "7171405334:7535290204",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "7260594642:7260594642",
+      "data": {
+        "__scenes": {},
+        "register": {
+          "step": "confirmation",
+          "name": "we",
+          "phone": "+79658874405",
+          "niche": "ewf",
+          "marketingBudget": "23",
+          "cac": "2",
+          "ltv": "2"
+        }
+      }
+    },
+    {
+      "id": "7260594642:7535290204",
       "data": {
         "__scenes": {}
       }

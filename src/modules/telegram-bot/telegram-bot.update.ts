@@ -588,6 +588,17 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
   async onDailyUseTools(@Ctx() ctx: Context & SceneContext) {
     await this.telegramBotService.dailyUseTools(ctx);
   }
+
+  @Action("my_leads")
+  async sendUserLeads(@Ctx() ctx: Context) {
+    await this.telegramBotService.sendLeads(ctx);
+  }
+
+  @Action("my_companys")
+  async sendUserCompanyes(@Ctx() ctx: Context) {
+    await this.telegramBotService.sendCompanyes(ctx);
+  }
+
 }
 
 //:${user.id}

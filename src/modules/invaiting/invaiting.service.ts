@@ -16,13 +16,7 @@ export class MailingService {
         
     }
 
-    async startInviating(userId:number, groupName:string, botId:number) {
-        const inviting = await this.prisma.inviting.create({
-            data: {
-                userId,
-                groupName,
-                botId,
-            }
-        })
+    async startInviating(groupName:string, leads:any[]) {
+        await this.userBotsService.inviteGroup(leads, groupName);
     }
 } 

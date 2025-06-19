@@ -13,16 +13,23 @@ import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper'
 interface LeadGenerationSession {
   sites?: string[]
   numbers?: string[]
-  time_period?: '1_day' | '1_week' | '1_month'
+  region?: string
   max_leads?: number
   day_leads_limit?: number
   company_name?: string
-  step: 'sites' | 'numbers' | 'period' | 'limits' | 'daily_limits' | 'company' | 'launch',
+  step: 'sites' | 'numbers' | 'company' | 'region' | 'limits' | 'daily_limits' | 'launch',
 }
 
 @Injectable()
 @Scene('lead_generation')
 export class LeadGenerationScene {
+  // Available regions for lead generation
+  private readonly regions = [
+    { text: 'Москва', value: 'moscow' },
+    { text: 'Санкт-Петербург', value: 'spb' },
+    { text: 'Вся Россия', value: 'russia' }
+  ];
+
   constructor(
     private readonly usersService: UsersService,
     private readonly adminService: AdminService,
@@ -85,7 +92,7 @@ export class LeadGenerationScene {
     switch (session.step) {
       case 'sites':
         console.log(text);
-        session.sites = text.trim().split('\n').join(', ');
+        session.sites = text;
         session.step = 'numbers';
         await ctx.reply('Введите список номеров телефонов (каждый с новой строки):', {
           reply_markup: {
@@ -97,35 +104,41 @@ export class LeadGenerationScene {
         break;
 
       case 'numbers':
-        session.numbers = text.trim().split('\n').join(', ');
+        session.numbers = text;
         session.step = 'company';
         await ctx.reply('Введите название вашей компании:');
         break;
 
       case 'company':
         session.company_name = text.trim();
-        session.step = 'period';
-        await ctx.reply(BotMessages.leadGeneration.selectPeriod, {
-          reply_markup: {
-            inline_keyboard: [
-              [
-                { text: BotMessages.leadGeneration.buttons.oneDay, callback_data: 'period_1_day' },
-                { text: BotMessages.leadGeneration.buttons.oneWeek, callback_data: 'period_1_week' }
-              ],
-              [{ text: BotMessages.leadGeneration.buttons.oneMonth, callback_data: 'period_1_month' }]
-            ]
-          }
-        });
+        session.step = 'region';
+        await ctx.reply('Введите регион для перехвата лидов:');
+        break;
+
+      case 'region':
+        session.region = text.trim();
+        session.step = 'limits';
+        await ctx.reply(BotMessages.leadGeneration.enterLeadLimit);
         break;
 
       case 'limits':
-        session.max_leads = parseInt(text);
+        const maxLeads = parseInt(text);
+        if (isNaN(maxLeads) || maxLeads <= 0) {
+          await ctx.reply('Пожалуйста, введите корректное число лидов (больше 0)');
+          return;
+        }
+        session.max_leads = maxLeads;
         session.step = 'daily_limits';
         await ctx.reply(BotMessages.leadGeneration.enterDailyLimit);
         break;
 
       case 'daily_limits':
-        session.day_leads_limit = parseInt(text);
+        const dailyLimit = parseInt(text);
+        if (isNaN(dailyLimit) || dailyLimit <= 0) {
+          await ctx.reply('Пожалуйста, введите корректное число для дневного лимита (больше 0)');
+          return;
+        }
+        session.day_leads_limit = dailyLimit;
         session.step = 'launch';
         await ctx.reply(BotMessages.leadGeneration.launch, {
           reply_markup: {
@@ -139,34 +152,6 @@ export class LeadGenerationScene {
         });
         break;
     }
-  }
-
-  @Action('agree_offer')
-  async onAgreeOffer(@Ctx() ctx: SceneContext) {
-    const session = ctx.session['leadGeneration'] as LeadGenerationSession;
-    session.step = 'period';
-    
-    await ctx.reply(BotMessages.leadGeneration.selectPeriod, {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            { text: BotMessages.leadGeneration.buttons.oneDay, callback_data: 'period_1_day' },
-            { text: BotMessages.leadGeneration.buttons.oneWeek, callback_data: 'period_1_week' }
-          ],
-          [{ text: BotMessages.leadGeneration.buttons.oneMonth, callback_data: 'period_1_month' }]
-        ]
-      }
-    });
-  }
-
-  @Action(/^period_\d+_(day|week|month)$/)
-  async onSelectPeriod(@Ctx() ctx: SceneContext & { match: RegExpExecArray }) {
-    const session = ctx.session['leadGeneration'] as LeadGenerationSession;
-    const period = ctx.match[0].split('_')[1] + '_' + ctx.match[0].split('_')[2] as '1_day' | '1_week' | '1_month';
-    session.time_period = period;
-    session.step = 'limits';
-    
-    await ctx.reply(BotMessages.leadGeneration.enterLeadLimit);
   }
 
   @Action('back_to_limits')
@@ -186,12 +171,12 @@ export class LeadGenerationScene {
 
     const companyName = session.company_name + '.' + user.username;
 
-    console.log(String(session.sites).split('\n').join(','));
+    console.log(String(session.sites));
 
     await this.adminService.sendLeadGenerationData(
-      String(session.sites).split('\n').join(','),
-      String(session.numbers).split('\n').join(','),
-      session.time_period,
+      String(session.sites),
+      String(session.numbers),
+      session.region,
       session.max_leads,
       session.day_leads_limit,
       user.username,
@@ -199,12 +184,10 @@ export class LeadGenerationScene {
       companyName
     );
 
-    
-
-   const competitor = await this.usersService.createCompetitor(
+    const competitor = await this.usersService.createCompetitor(
       ctx.from.id,
-      String(session.sites).split('\n').join(','),
-      String(session.numbers).split('\n').join(','),
+      session.sites.join(','),
+      session.numbers.join(',')
     );
 
     await this.ordersService.createLeadGeneration(
@@ -214,7 +197,6 @@ export class LeadGenerationScene {
       session.day_leads_limit,
       companyName
     );
-
 
     await ctx.reply('Настройки сохранены. Система будет настроена в течение 24 часов.', {
       reply_markup: {

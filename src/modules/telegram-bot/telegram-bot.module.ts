@@ -34,6 +34,7 @@ import { BuyingLeadsScene } from './scenes/clients/buyingLeads.scene';
 import { LoadCRMScene } from './scenes/clients/register-crm.scene';
 import { StartCallingScene } from './scenes/auto/start-calling.scene';
 import { CallsModule } from '../calls/calls.module';
+import { LeadsModule } from '../leads/leads.module';
 
 const session = new LocalSession()
 
@@ -48,6 +49,7 @@ const session = new LocalSession()
     PrismaModule,
     forwardRef(() => AdminModule),
     forwardRef(() => MailingModule),
+    forwardRef(() => LeadsModule  ),
     TelegrafModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

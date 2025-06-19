@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { RedisService } from 'src/core/redis/redis.service';
-import { TelegramClient } from 'telegram';
+import { client, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
 import { Api } from 'telegram/tl';
 import { PrismaService } from '../core/prisma/Prisma.service';
+import { UserBots } from '@prisma/client';
 
  
 @Injectable()
@@ -241,7 +242,7 @@ export class UserBotsService {
         let client: TelegramClient | null = null;
     
         try {
-            //const sessionString = await this.redisService.srandmember("telegram:userbots");
+            
             const sessionString = await this.login();
             console.log(sessionString);
             if (!sessionString) {
@@ -255,7 +256,11 @@ export class UserBotsService {
             });
     
             await client.connect();
-    
+
+            const groupIdentifier = groupName;
+            const group = await client.getEntity(groupIdentifier);
+            await client.invoke(new Api.channels.JoinChannel({ channel: group }));
+            
             for (const username of usernames) {
                 await this.inviteLead(username, groupName, client);
             }
@@ -265,6 +270,94 @@ export class UserBotsService {
             if (client) {
                 await client.disconnect();
             }
+        }
+    }
+
+    async inviteGroupV2(usernames: string[], groupName: any) {
+        const userbots = (await this.prisma.userBots.findMany()).sort((a, b) => Math.random() - 0.5);
+        let userbot = userbots[0];
+        let currentUserbot = 0;
+
+        let client = await this.loginUserBot(userbot);
+
+        let group = await client.getEntity(groupName);
+        await client.invoke(new Api.channels.JoinChannel({ channel: group }));
+        let isSwitchbot = false;
+
+        console.log('start');
+
+        for(let i = 0; i < usernames.length; i++) {
+
+            try {
+                console.log(usernames[i]);
+                if(userbots.length <= currentUserbot) return;
+
+                if((i % 10 === 0 && i !== 0) || isSwitchbot) {
+
+                    userbot = userbots[++currentUserbot];
+
+                    this.logoutUserBot(client);
+
+                    client = await this.loginUserBot(userbot);
+                    isSwitchbot = false;
+
+                    group = await client.getEntity(groupName);
+                    await client.invoke(new Api.channels.JoinChannel({ channel: group }));
+                }
+                console.log('приглашаем пользователя', usernames[i]);
+                await this.inviteLeadInGroup(usernames[i], group, client);
+                console.log('успешно');
+                await new Promise(resolve => setTimeout(resolve, 1000 * 120))
+            }
+            catch(e) {
+                console.warn(e);
+                if(e.errorMessage === 'PEER_FLOOD' && usernames.length >= currentUserbot) {
+                    isSwitchbot = true;
+                    i--;
+                    continue;
+                }
+            }
+            
+        }
+
+        await this.logoutUserBot(client);
+    }
+
+    async loginUserBot(userbot:UserBots) {
+        const client = new TelegramClient(new StringSession(userbot.session), this.apiId, this.apiHash, {
+            connectionRetries: 2,
+        });
+
+        await client.connect();
+
+        return client;
+    }
+
+    async logoutUserBot(client:any) {
+        await client.disconnect();
+    }
+
+    async inviteLeadInGroup(username:string, group:any, client:any) {
+        try {
+            const user = await client.getEntity(username);
+        
+            console.log('Приглашаем пользователя...');
+            if (group instanceof Api.Channel) {
+            await client.invoke(new Api.channels.InviteToChannel({
+                channel: group,
+                users: [user]
+            }));
+            } else {
+            await client.invoke(new Api.messages.AddChatUser({
+                chatId: group.id,
+                userId: user,
+                fwdLimit: 100
+            }));
+            }
+            console.log(`Пользователь @${username} успешно приглашен в ${group.title || 'группу'}`);
+        }
+        catch(e) {
+            throw e;
         }
     }
 

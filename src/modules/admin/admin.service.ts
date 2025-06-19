@@ -23,6 +23,10 @@ export class AdminService {
     ) {}
 
     async getRandomManager() {
+
+        const peremoneyManager = await this.usersService.getUserByName('peremoney_support');
+        if(peremoneyManager) return peremoneyManager;
+
         const managers = await this.usersService.getUsersByRole('moderator');
 
         if (managers.length === 0) {
@@ -50,7 +54,7 @@ export class AdminService {
 
             Файл с сайтами: ${fileIdSites}
             Файл с номерами: ${fileIdNumbers}
-            Период: ${timePeriod}
+            регион: ${timePeriod}
             Максимальное количество лидов: ${maxLeads}
             Суточный лимит: ${dayLeadsLimit}
 
@@ -190,7 +194,7 @@ export class AdminService {
 
         console.log(invitingData.leads);
         
-        await this.userBotsService.inviteGroup(invitingData.leads, 'testchannel23325');
+        //await this.userBotsService.inviteGroup(invitingData.leads, 'testchannel23325');
         
     }
 

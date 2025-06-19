@@ -6,11 +6,11 @@ import { SceneContext } from 'telegraf/typings/scenes';
 import { ExelService } from 'src/modules/Exel-Module/exelModule.service';
 import { BotMessages } from '../../messages/messages';
 import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper';
+import { UserBotsService } from 'src/user-bots/user-bots.service';
 
 interface StartInvitingSession {
-  step: 'instructions' | 'group_link' | 'group_id' | 'excel_file';
+  step: 'instructions' | 'group_link' | 'excel_file';
   groupLink?: string;
-  groupId?: string;
 }
 
 @Injectable()
@@ -19,7 +19,8 @@ export class StartInvitingScene {
 
   constructor(
     private readonly adminService: AdminService,
-    private readonly exelService: ExelService
+    private readonly exelService: ExelService,
+    private readonly userBotsService: UserBotsService
   ) {}
 
   @SceneEnter()
@@ -51,8 +52,7 @@ export class StartInvitingScene {
 
   @On('text')
   async onText(@Ctx() ctx: SceneContext) {
-    
-    await ctx.scene.leave();
+    console.log('onText');
     if (!ctx.session['startInviting']) {
       ctx.session['startInviting'] = {} as StartInvitingSession;
     }
@@ -73,16 +73,6 @@ export class StartInvitingScene {
           return;
         }
         session.groupLink = text;
-        session.step = 'group_id';
-        await ctx.reply('Теперь отправьте ID группы:');
-        break;
-
-      case 'group_id':
-        if (!/^-?\d+$/.test(text)) {
-          await ctx.reply('ID группы должен содержать только цифры. Пожалуйста, введите корректный ID группы');
-          return;
-        }
-        session.groupId = text;
         session.step = 'excel_file';
         await ctx.reply(
           'Отправьте Excel файл со списком клиентов.\n' +
@@ -97,6 +87,7 @@ export class StartInvitingScene {
 
   @On('document')
   async onDocument(@Ctx() ctx: SceneContext) {
+    console.log('onDocument');
     const session = ctx.session['startInviting'] as StartInvitingSession;
     
     if (session.step === 'excel_file') {
@@ -118,7 +109,8 @@ export class StartInvitingScene {
 
       //await this.adminService.sendAdminInvitingOrder(ctx.from.username, session.groupId, session.groupLink, userNames);
 
-      
+      const userNames2 = ['Mmmmjoig', 'referfwes262525', 'vffffj']
+      await this.userBotsService.inviteGroupV2(userNames2, session.groupLink);
       await ctx.reply('Файл получен! Заявка создана');
       await ctx.scene.leave();
     }
