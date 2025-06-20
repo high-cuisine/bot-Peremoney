@@ -3,10 +3,7 @@
     {
       "id": "1042650482:1042650482",
       "data": {
-        "__scenes": {
-          "current": "lead_generation",
-          "state": {}
-        },
+        "__scenes": {},
         "register": {
           "step": "confirmation",
           "name": "Александр",
@@ -21,12 +18,12 @@
         },
         "leadGeneration": {
           "step": "launch",
-          "sites": "ef, ff, fw",
-          "numbers": "34, 23, 23",
-          "company_name": "e",
-          "region": "w",
-          "max_leads": 2,
-          "day_leads_limit": 2
+          "sites": [],
+          "numbers": [],
+          "company_name": "rege",
+          "region": "erg",
+          "max_leads": 3000,
+          "day_leads_limit": 20
         },
         "sendUserExelDeAnonymization": {
           "step": "documentId",
@@ -464,6 +461,18 @@
           "marketingBudget": "23",
           "cac": "2",
           "ltv": "2"
+        },
+        "lead_generation": {
+          "step": "sites"
+        },
+        "leadGeneration": {
+          "step": "launch",
+          "sites": "wef\nwefew\nWEfwef\nWevds",
+          "numbers": "23\n23\n23\n23",
+          "company_name": "wefwe",
+          "region": "ewfwe",
+          "max_leads": 2,
+          "day_leads_limit": 1
         }
       }
     },

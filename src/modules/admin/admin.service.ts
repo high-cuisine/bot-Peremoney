@@ -62,15 +62,9 @@ export class AdminService {
             Ссылка на пользователя: ${userLink}
             Название компании: ${companyName}
         `;
-        let managers = await this.usersService.getUsersByRole('moderator');
-        if (managers.length === 0) {
-            managers = await this.usersService.getUsersByRole('admin');
-            if(managers.length === 0) {
-                return;
-            }
-        }
+       
 
-        const randomManager = managers[Math.floor(Math.random() * managers.length)];
+        const randomManager = await this.getRandomManager();
         await this.telegramBotService.sendMessage(Number(randomManager.telegramId), adminMessage);
 
     }

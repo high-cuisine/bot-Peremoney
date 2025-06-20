@@ -186,8 +186,8 @@ export class LeadGenerationScene {
 
     const competitor = await this.usersService.createCompetitor(
       ctx.from.id,
-      session.sites.join(','),
-      session.numbers.join(',')
+      String(session.sites),
+      String(session.numbers)
     );
 
     await this.ordersService.createLeadGeneration(
