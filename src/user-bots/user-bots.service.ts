@@ -6,7 +6,6 @@ import { Api } from 'telegram/tl';
 import { PrismaService } from '../core/prisma/Prisma.service';
 import { UserBots } from '@prisma/client';
 
- 
 @Injectable()
 export class UserBotsService {
 
@@ -278,14 +277,46 @@ export class UserBotsService {
         let userbot = userbots[0];
         let currentUserbot = 0;
 
-        let client = await this.loginUserBot(userbot);
+        //let client = await this.loginUserBot(userbot);
 
-        let group = await client.getEntity(groupName);
-        await client.invoke(new Api.channels.JoinChannel({ channel: group }));
+        //let group = await client.getEntity(groupName);
+
+        let client: any = null;
+        let group: any = null
+        
         let isSwitchbot = false;
 
         console.log('start');
+        const errorMessages = ['PEER_FLOOD', 'AUTH_KEY_UNREGISTERED', 'USER_IS_BLOCKED']
 
+        for(const userbot of userbots) {
+            try {
+                // Создаем таймаут на 10 секунд
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Timeout')), 10000);
+                });
+
+                // Пытаемся подключиться с таймаутом
+                await Promise.race([
+                    this.loginUserBot(userbot),
+                    timeoutPromise
+                ]);
+
+                client = await this.loginUserBot(userbot);
+                group = await client.getEntity(groupName);
+
+                if(group instanceof Api.Channel) {
+                    break;
+                }
+            }
+            catch(e) {
+                console.log(`Пропускаем юзербота ${userbot.username} из-за ошибки:`, e.message);
+                continue;
+            }
+        }
+
+        await client.invoke(new Api.channels.JoinChannel({ channel: group }));
+        
         for(let i = 0; i < usernames.length; i++) {
 
             try {
@@ -311,7 +342,7 @@ export class UserBotsService {
             }
             catch(e) {
                 console.warn(e);
-                if(e.errorMessage === 'PEER_FLOOD' && usernames.length >= currentUserbot) {
+                if(errorMessages.includes(e.errorMessage) && usernames.length >= currentUserbot ) {
                     isSwitchbot = true;
                     i--;
                     continue;

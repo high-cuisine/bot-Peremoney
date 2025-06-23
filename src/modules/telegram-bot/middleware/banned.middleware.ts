@@ -22,7 +22,7 @@ export class BannedMiddleware implements NestMiddleware {
         const isAllowed = await this.bannedGuard.canActivate(mockContext as any);
 
         if (!isAllowed) {
-            await ctx.reply('Вы заблокированы в системе. Пожалуйста, обратитесь к администратору.');
+            //await ctx.reply('Вы заблокированы в системе. Пожалуйста, обратитесь к администратору.');
             return;
         }
 

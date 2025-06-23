@@ -201,6 +201,14 @@ export class UsersService {
 
         return companyes
     }
+
+    async decrimentLeads(userId:number, amount:number) {
+        await this.prisma.user.update({where:{id:userId},
+        data: {
+            leads: {decrement:amount}
+        }
+        })
+    }
 }
 
 

@@ -3,7 +3,10 @@
     {
       "id": "1042650482:1042650482",
       "data": {
-        "__scenes": {},
+        "__scenes": {
+          "current": "start_inviting",
+          "state": {}
+        },
         "register": {
           "step": "confirmation",
           "name": "Александр",
@@ -41,7 +44,7 @@
         },
         "startInviting": {
           "step": "excel_file",
-          "groupLink": "https://t.me/uiuiu123qwerty",
+          "groupLink": "https://t.me/testsasha12",
           "groupId": "43",
           "userbot": {
             "id": 2,
