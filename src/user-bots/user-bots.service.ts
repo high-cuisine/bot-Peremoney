@@ -293,7 +293,7 @@ export class UserBotsService {
             try {
                 // Создаем таймаут на 10 секунд
                 const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error('Timeout')), 10000);
+                    setTimeout(() => reject(new Error('Timeout qwerty')), 10000);
                 });
 
                 // Пытаемся подключиться с таймаутом
@@ -316,7 +316,7 @@ export class UserBotsService {
         }
 
         await client.invoke(new Api.channels.JoinChannel({ channel: group }));
-        
+
         for(let i = 0; i < usernames.length; i++) {
 
             try {
@@ -338,7 +338,7 @@ export class UserBotsService {
                 console.log('приглашаем пользователя', usernames[i]);
                 await this.inviteLeadInGroup(usernames[i], group, client);
                 console.log('успешно');
-                await new Promise(resolve => setTimeout(resolve, 1000 * 120))
+                await new Promise(resolve => setTimeout(resolve, 1000 * 60))
             }
             catch(e) {
                 console.warn(e);
@@ -354,15 +354,30 @@ export class UserBotsService {
         await this.logoutUserBot(client);
     }
 
-    async loginUserBot(userbot:UserBots) {
+    async loginUserBot(userbot: UserBots) {
         const client = new TelegramClient(new StringSession(userbot.session), this.apiId, this.apiHash, {
             connectionRetries: 2,
+            useWSS: true,
+            autoReconnect: false
         });
 
         await client.connect();
 
+        // Дополнительно отключаем обновления через API
+        try {
+            await client.invoke(new Api.updates.GetState());
+            await client.invoke(new Api.updates.GetDifference({
+                pts: 0,
+                date: 0,
+                qts: 0
+            }));
+        } catch (error) {
+            console.log('Ошибка при сбросе обновлений:', error.message);
+        }
+
         return client;
     }
+    
 
     async logoutUserBot(client:any) {
         await client.disconnect();
