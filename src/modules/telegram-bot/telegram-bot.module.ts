@@ -35,6 +35,7 @@ import { LoadCRMScene } from './scenes/clients/register-crm.scene';
 import { StartCallingScene } from './scenes/auto/start-calling.scene';
 import { CallsModule } from '../calls/calls.module';
 import { LeadsModule } from '../leads/leads.module';
+import { AudioService } from './services/audio.service';
 
 const session = new LocalSession()
 
@@ -74,6 +75,7 @@ const session = new LocalSession()
     SettingCabinetScene,
     BannedGuard,
     BannedMiddleware,
+    AudioService,
 
     AdminBanUserScene,
     AdminUnbanUserScene,  

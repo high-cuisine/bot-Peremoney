@@ -6,6 +6,7 @@ import { AdminService } from 'src/modules/admin/admin.service';
 import { ExelService } from 'src/modules/Exel-Module/exelModule.service';
 import { MailingService } from 'src/modules/mailing/mailing.service';
 import { BotMessages } from '../../messages/messages';
+import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper';
 
 interface SmsMailingSession {
   step: 'instructions' | 'message' | 'excel_file';
@@ -42,6 +43,7 @@ export class SmsMailingScene {
 Текст должен укладываться в лимит 70 символов, включая пробелы. Ссылка на сайт/чат/соцсети в лимит не входит. Рекомендуем использовать минимум "воды" и сразу указывать в сообщении конкретный оффер с ценой и УТП. Ссылку отправьте после текста отдельным сообщением.
 
 <b>Теперь, пожалуйста, отправьте сообщение для SMS-рассылки:</b>`);
+    await addCancelButton(ctx);
   }
 
   @On('text')
@@ -52,7 +54,9 @@ export class SmsMailingScene {
     
     const session = ctx.session['smsMailing'] as SmsMailingSession;
     const text = (ctx.message as any).text;
-
+    if (await handleCancelButton(ctx, text)) {
+      return;
+    }
     if(text === '/exit') {
       await ctx.reply('Выход из вопросов');
       await ctx.scene.leave();
@@ -105,10 +109,14 @@ export class SmsMailingScene {
   @On('callback_query')
   async onCallbackQuery(@Ctx() ctx: SceneContext) {
     const callbackData = (ctx.callbackQuery as any).data;
-
     if (callbackData === 'cancel_sms_mailing') {
       await ctx.reply('Процесс создания SMS-рассылки отменен.');
       await ctx.scene.leave();
+    }
+    if (callbackData === 'main_menu') {
+      await ctx.reply('Переход в главное меню');
+      await ctx.scene.leave();
+      await ctx.reply('/start');
     }
   }
 

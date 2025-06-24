@@ -37,21 +37,22 @@ export class AutoSettingsService {
             }
         });
 
-        console.log(leadsGeneration);
-
         for(const lead of leadsGeneration) {
             console.log(lead, 11);
-            if(lead.auto) {
-                await this.sendLeadsToUsers(lead as LeadGenerationWithUser);
-            }
-            else {
-                await this.sendExelToUser(lead as LeadGenerationWithUser);
-            }
+            await this.sendExelToUser(lead as LeadGenerationWithUser);
+            // if(lead.auto) {
+            //     await this.sendLeadsToUsers(lead as LeadGenerationWithUser);
+            // }
+            // else {
+            //     await this.sendExelToUser(lead as LeadGenerationWithUser);
+            // }
         }
     }
 
     async sendLeadsToUsers(leadGeneration: LeadGenerationWithUser) {
         const leads = await this.prisma.usersClients.findMany({where: {companyId: leadGeneration.id}});
+
+        console.log(leadGeneration, 'new leads fro');
         
         if (leads.length === 0) {
             return;
@@ -82,28 +83,13 @@ export class AutoSettingsService {
             }
         });
 
+        console.log(leads, 'leads');
+
         if (leads.length === 0) {
             return;
         }
 
         const exelBuffer = await this.exelService.exportToExcelBuffer(leads);
-
-        if(leadGeneration.auto) {
-            await this.botService.sendMessageWithButtonActionArray(
-                Number(leadGeneration.user.telegramId),
-                `Новые лиды для компании ${leadGeneration.projectName}`,
-                ['Включить автоматизацию', 'Использовать инструменты на этих лидах'],
-                [`enable_auto:${leadGeneration.projectName}`, 'daily_use_tools']
-            );
-        }
-        else {
-            await this.botService.sendMessageWithButtonAction(
-                Number(leadGeneration.user.telegramId),
-                `Новые лиды для компании ${leadGeneration.projectName}`,
-                'Отключить автоматизацию',
-                `disable_auto:${leadGeneration.projectName}`
-            );
-        }
 
         await this.botService.sendDocumentBuffer(
             Number(leadGeneration.user.telegramId), 

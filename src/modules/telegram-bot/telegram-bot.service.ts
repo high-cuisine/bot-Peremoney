@@ -14,6 +14,7 @@ import { MailingService } from '../mailing/mailing.service';
 import { AdminService } from '../admin/admin.service';
 import { PaymentService } from '../payment/payment.service';
 import { LeadsService } from '../leads/leads.service';
+import { setTelegramBotServiceInstance } from './helpers/scene.helper';
   
 @Injectable()
     export class TelegramBotService {
@@ -26,7 +27,9 @@ import { LeadsService } from '../leads/leads.service';
         private readonly paymentService: PaymentService,
         private readonly leadsService: LeadsService,
         @InjectBot() private readonly bot: Telegraf<Context>,
-    ) {}
+    ) {
+        setTelegramBotServiceInstance(this);
+    }
 
     // await ctx.replyWithPhoto(
     //     { source: photoStream },
@@ -162,7 +165,7 @@ import { LeadsService } from '../leads/leads.service';
             });
 
             const fileMap = createReadStream(join(__dirname, '..', '..', 'assets/map.png'));
-            await ctx.replyWithPhoto({ source: fileMap }, {caption: 'Как работает перехват'})
+            await ctx.replyWithPhoto({ source: fileMap }, {caption: 'Как работает технология перехвата лидов'})
         } else {
             await ctx.reply(BotMessages.subscription.error);
         }
@@ -243,7 +246,7 @@ import { LeadsService } from '../leads/leads.service';
     async getLeadsMenuButtons() {
         return [
             [{ text: 'Мои лиды', callback_data: 'my_leads' }],
-            [{ text: 'Мои компании', callback_data: 'my_companys' }],
+            [{ text: 'Мои кампании', callback_data: 'my_companys' }],
             [{ text: 'Настроить перехват лидов', callback_data: 'start_lead_generation' }]
         ]
     }
@@ -343,13 +346,15 @@ import { LeadsService } from '../leads/leads.service';
 
         const photoStream = createReadStream(photoPath);
 
+        const parterUrl = `https://t.me/Peremoney_Support?start=${`partner-${ctx.from.id}`}`;
+
         await ctx.replyWithPhoto(
             { source: photoStream },
             {
-                caption: 'Для сотрудничества с нашим сервисом, напишите в поддержку, нажав на кнопку ниже',
+                caption: `Для сотрудничества с нашим сервисом, напишите в поддержку, нажав на кнопку ниже \n\n  Ваша реферальная ссылка: ${parterUrl}`,
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: 'Написать в поддержку', url: 'https://t.me/Peremoney_Support' }]
+                    [{ text: 'Написать в поддержку', url: parterUrl }]
                 ]
             }}
         );

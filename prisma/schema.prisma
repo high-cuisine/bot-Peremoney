@@ -172,6 +172,16 @@ model Inviting {
   userbots UserBots? @relation(fields: [botId], references: [id])
 }
 
+
+model Partners {
+  id          Int     @id @default(autoincrement())
+  referrerId  Int
+  referredId  Int
+
+  user       User   @relation(fields: [referrerId], references: [id])
+  user       User   @relation(fields: [referredId], references: [id])
+}
+
 enum UserRoles {
   admin
   moderator
