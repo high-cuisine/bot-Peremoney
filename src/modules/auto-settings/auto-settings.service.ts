@@ -64,10 +64,15 @@ export class AutoSettingsService {
             `🆔 Telegram ID: ${lead.telegramId}`
         ).join('\n\n');
 
-        await this.botService.sendMessage(
-            Number(leadGeneration.user.telegramId),
-            `Новые лиды для компании ${leadGeneration.projectName}:\n\n${message}`
-        );
+        try {
+            await this.botService.sendMessage(
+                Number(leadGeneration.user.telegramId),
+                `Новые лиды для компании ${leadGeneration.projectName}:\n\n${message}`
+            );
+        } catch (error) {
+            // Если пользователь заблокировал бота, логируем и продолжаем работу
+            console.log(`Не удалось отправить лиды пользователю ${leadGeneration.user.telegramId}: ${error.message}`);
+        }
     }
 
     async sendExelToUser(leadGeneration: LeadGenerationWithUser) {
@@ -91,16 +96,21 @@ export class AutoSettingsService {
 
         const exelBuffer = await this.exelService.exportToExcelBuffer(leads);
 
-        await this.botService.sendDocumentBuffer(
-            Number(leadGeneration.user.telegramId), 
-            Buffer.from(exelBuffer),
-            { filename: 'orders.xlsx' }
-        );
+        try {
+            await this.botService.sendDocumentBuffer(
+                Number(leadGeneration.user.telegramId), 
+                Buffer.from(exelBuffer),
+                { filename: 'orders.xlsx' }
+            );
 
-        await this.prisma.usersClients.updateMany({
-            where: {companyId: leadGeneration.id, processed: false},
-            data: {processed: true}
-        });
+            await this.prisma.usersClients.updateMany({
+                where: {companyId: leadGeneration.id, processed: false},
+                data: {processed: true}
+            });
+        } catch (error) {
+            // Если пользователь заблокировал бота, логируем и продолжаем работу
+            console.log(`Не удалось отправить Excel файл пользователю ${leadGeneration.user.telegramId}: ${error.message}`);
+        }
     }
 
     async disableAuto(userId:number, projectName:string) {

@@ -110,7 +110,17 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
 
       async sendMessage(id:number, message:string) {
         console.log(id, message);
-        await this.bot.telegram.sendMessage(id, message);
+        try {
+            await this.bot.telegram.sendMessage(id, message);
+        } catch (error) {
+            // Проверяем, является ли ошибка 403 Forbidden (пользователь заблокировал бота)
+            if (error?.response?.error_code === 403 && error?.response?.description?.includes('bot was blocked by the user')) {
+                console.log(`Пользователь ${id} заблокировал бота, пропускаем отправку сообщения`);
+                return;
+            }
+            // Если это другая ошибка, пробрасываем её дальше
+            throw error;
+        }
       }
 
       async getDocument(ctx:Context) {
@@ -317,10 +327,20 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
     }
 
     async sendDocumentBuffer(chatId: number, buffer: Buffer, options?: { filename?: string; contentType?: string }) {
-        await this.bot.telegram.sendDocument(chatId, { 
-            source: buffer,
-            filename: options?.filename || 'document.xlsx'
-        });
+        try {
+            await this.bot.telegram.sendDocument(chatId, { 
+                source: buffer,
+                filename: options?.filename || 'document.xlsx'
+            });
+        } catch (error) {
+            // Проверяем, является ли ошибка 403 Forbidden (пользователь заблокировал бота)
+            if (error?.response?.error_code === 403 && error?.response?.description?.includes('bot was blocked by the user')) {
+                console.log(`Пользователь ${chatId} заблокировал бота, пропускаем отправку`);
+                return;
+            }
+            // Если это другая ошибка, пробрасываем её дальше
+            throw error;
+        }
     }
 
     async sendBalance(ctx:Context) {
