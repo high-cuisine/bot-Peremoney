@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import FormData from 'form-data';
-import fetch from 'node-fetch'; 
+import axios from 'axios';
 import { https } from 'follow-redirects';
 
 @Injectable()
@@ -22,12 +22,11 @@ export class CallsService {
         formData.append('phones', phonesMessage);
         formData.append('text_from_column', '1');
     
-        const res = await fetch('https://zvonok.com/manager/cabapi_external/api/v1/phones/append/calls/', {
-            method: 'POST',
-            body: formData
+        const res = await axios.post('https://zvonok.com/manager/cabapi_external/api/v1/phones/append/calls/', formData, {
+            headers: formData.getHeaders()
         });
     
-        console.log(res.status, await res.text());
+        console.log(res.status, res.data);
     
         return res;
     }
@@ -93,18 +92,18 @@ export class CallsService {
 
             console.log('[CallsService] Creating call campaign with audio');
 
-            const response = await fetch(
+            const response = await axios.post(
                 'https://zvonok.com/manager/cabapi_external/api/v1/phones/append/calls/', 
+                formData,
                 {
-                    method: 'POST',
-                    body: formData
+                    headers: formData.getHeaders()
                 }
             );
 
-            const result = await response.text();
+            const result = response.data;
             console.log('[CallsService] Call campaign response:', response.status, result);
 
-            return { success: response.ok, data: result };
+            return { success: response.status >= 200 && response.status < 300, data: result };
         } catch (error) {
             console.error('[CallsService] Error creating call campaign:', error);
             throw error;
