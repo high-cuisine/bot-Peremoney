@@ -26,6 +26,7 @@ export class BotUpdate {
 
   @Start()
   @Hears('Обновить бота')
+  @Hears('Главное меню')
   @Action('start')
   async onStart(@Ctx() ctx: Context) {
     await this.telegramBotService.sendBanner(ctx);

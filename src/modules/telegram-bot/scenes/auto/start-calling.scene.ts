@@ -8,15 +8,10 @@ import { BotMessages } from '../../messages/messages';
 import { CallsService } from 'src/modules/calls/calls.service';
 import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper';
 import { RedisService } from 'src/core/redis/redis.service';
-import { AudioService } from '../../services/audio.service';
 
 interface StartCallingSession {
-  step: 'instructions' | 'voice_message' | 'excel_file' | 'confirmation';
-  voiceMessage?: {
-    buffer: Buffer;
-    fileName: string;
-    mimeType: string;
-  };
+  step: 'instructions' | 'call_text' | 'excel_file' | 'confirmation';
+  callText?: string;
   phoneNumbers?: string[];
 }
 
@@ -27,8 +22,7 @@ export class StartCallingScene {
     private readonly adminService: AdminService,
     private readonly exelService: ExelService,
     private readonly callsService: CallsService,
-    private redisService: RedisService,
-    private readonly audioService: AudioService
+    private redisService: RedisService 
   ) {}
 
   @SceneEnter()
@@ -47,64 +41,6 @@ export class StartCallingScene {
     }); 
 
     await addCancelButton(ctx);
-  }
-
-  @On('voice')
-  async onVoice(@Ctx() ctx: SceneContext) {
-    if (!ctx.session['startCalling']) {
-      ctx.session['startCalling'] = {} as StartCallingSession;
-    }
-    
-    const session = ctx.session['startCalling'] as StartCallingSession;
-    
-    if (session.step !== 'instructions') {
-      await ctx.reply('Пожалуйста, сначала отправьте голосовое сообщение для обзвона.');
-      return;
-    }
-
-    const voice = (ctx.message as any).voice;
-    console.log('[StartCalling] Voice message received:', {
-      fileId: voice.file_id,
-      duration: voice.duration,
-      mimeType: voice.mime_type
-    });
-
-    try {
-      // Получаем файл от Telegram
-      const fileLink = await ctx.telegram.getFileLink(voice.file_id);
-      const response = await fetch(fileLink);
-      const buffer = await response.arrayBuffer();
-
-      // Обрабатываем голосовое сообщение
-      const processedVoice = await this.audioService.processVoiceMessage(
-        Buffer.from(buffer),
-        `voice_${voice.file_id}.${voice.mime_type?.split('/')[1] || 'ogg'}`
-      );
-
-      session.voiceMessage = processedVoice;
-      session.step = 'excel_file';
-
-      console.log('[StartCalling] Voice message processed:', {
-        size: processedVoice.buffer.length,
-        fileName: processedVoice.fileName,
-        mimeType: processedVoice.mimeType
-      });
-
-      await ctx.reply(
-        '✅ Голосовое сообщение получено!\n\n' +
-        `Длительность: ${voice.duration} секунд\n` +
-        `Размер: ${Math.round(processedVoice.buffer.length / 1024)} КБ\n\n` +
-        'Теперь отправьте Excel файл со списком номеров телефонов.\n' +
-        'Файл должен содержать колонку с номерами в международном формате.',
-        Markup.inlineKeyboard([
-          [Markup.button.callback('Отменить процесс', 'cancel_calling')]
-        ])
-      );
-
-    } catch (error) {
-      console.error('[StartCalling] Error processing voice message:', error);
-      await ctx.reply('Произошла ошибка при обработке голосового сообщения. Пожалуйста, попробуйте еще раз.');
-    }
   }
 
   @On('text')
@@ -127,16 +63,29 @@ export class StartCallingScene {
       return;
     }
 
-    // Если пользователь отправляет текст на этапе инструкций, напоминаем о голосовом сообщении
-    if (session.step === 'instructions') {
-      await ctx.reply('Пожалуйста, отправьте голосовое сообщение для обзвона, а не текст.');
-      return;
+    switch (session.step) {
+      case 'instructions':
+        if (text.length < 10) {
+          console.log('[StartCalling] Text too short:', text.length, 'chars');
+          await ctx.reply('Текст слишком короткий. Пожалуйста, напишите более подробный текст для обзвона');
+          return;
+        }
+        session.callText = text;
+        session.step = 'excel_file';
+        console.log('[StartCalling] Call text saved, length:', text.length);
+        await ctx.reply(
+          'Отправьте Excel файл со списком номеров телефонов.\n' +
+          'Файл должен содержать колонку с номерами в международном формате.',
+          Markup.inlineKeyboard([
+            [Markup.button.callback('Отменить процесс', 'cancel_calling')]
+          ])
+        );
+        break;
     }
   }
 
   @On('document')
   async onDocument(@Ctx() ctx: SceneContext) {
-    console.log('onDocument');
     const session = ctx.session['startCalling'] as StartCallingSession;
     
     if (session.step === 'excel_file') {
@@ -158,12 +107,12 @@ export class StartCallingScene {
 
       console.log('[StartCalling] Excel processed:', {
         phones: session.phoneNumbers.length,
-        voiceMessage: session.voiceMessage ? 'present' : 'missing'
+        textLength: session.callText?.length
       });
 
       await ctx.reply(
         'Файл получен! Проверьте данные:\n\n' +
-        `Голосовое сообщение: ✅ Получено (${session.voiceMessage?.buffer.length} байт)\n` +
+        `Текст для обзвона: ${session.callText}\n` +
         `Количество номеров: ${session.phoneNumbers.length}\n\n` +
         'Подтвердите запуск обзвона:',
         Markup.inlineKeyboard([
@@ -189,47 +138,23 @@ export class StartCallingScene {
       await ctx.scene.leave();
     } else if (callbackData === 'confirm_calling') {
       console.log('[StartCalling] Process confirmed:', {
-        voiceMessageSize: session.voiceMessage?.buffer.length,
+        textLength: session.callText?.length,
         phonesCount: session.phoneNumbers?.length
       });
       
       try {
-        if (!session.voiceMessage || !session.phoneNumbers) {
-          throw new Error('Missing voice message or phone numbers');
-        }
 
-        // Отправляем сообщение о начале обработки
-        await ctx.reply('🔄 Загружаю аудио файл на сервер...');
-
-        // Создаем обзвон с аудио
-        const response = await this.callsService.createCallWithAudio(
-          session.voiceMessage.buffer,
-          session.voiceMessage.fileName,
-          session.phoneNumbers
+        await this.adminService.sendAdminCallingOrder(ctx.from.username, session.callText, session.phoneNumbers)
+        const response = await this.callsService.createCall(session.callText, session.phoneNumbers);
+        console.log('[StartCalling] Call created successfully');
+        await ctx.reply('Заявка на обзвон создана!', 
+            Markup.inlineKeyboard([
+                [Markup.button.callback('В меню', 'start')]
+            ])
         );
-
-        console.log('[StartCalling] Call created successfully:', response);
-        
-        await ctx.reply(
-          '✅ Заявка на обзвон создана успешно!\n\n' +
-          `📊 Статус: ${response.success ? 'Успешно' : 'Ошибка'}\n` +
-          `📞 Количество номеров: ${session.phoneNumbers.length}\n` +
-          `🎵 Аудио файл: ${session.voiceMessage.fileName}`,
-          Markup.inlineKeyboard([
-              [Markup.button.callback('В меню', 'start')]
-          ])
-        );
-
       } catch (error) {
         console.error('[StartCalling] Error creating call:', error);
-        await ctx.reply(
-          '❌ Произошла ошибка при создании заявки на обзвон.\n\n' +
-          'Возможные причины:\n' +
-          '• Неверный формат аудио файла\n' +
-          '• Проблемы с подключением к серверу\n' +
-          '• Недостаточно средств на балансе\n\n' +
-          'Пожалуйста, попробуйте позже или обратитесь в поддержку.'
-        );
+        await ctx.reply('Произошла ошибка при создании заявки на обзвон. Пожалуйста, попробуйте позже.');
       }
       
       await ctx.scene.leave();

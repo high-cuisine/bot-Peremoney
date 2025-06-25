@@ -165,7 +165,7 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
             });
 
             const fileMap = createReadStream(join(__dirname, '..', '..', 'assets/map.png'));
-            await ctx.replyWithPhoto({ source: fileMap }, {caption: 'Как работает технология перехвата лидов'})
+            await ctx.replyWithPhoto({ source: fileMap }, {caption: 'Как работает перехват лидов'})
         } else {
             await ctx.reply(BotMessages.subscription.error);
         }
@@ -239,6 +239,7 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
             [{ text: 'Инвайтинг в Телеграм', callback_data: 'tools_inviting' }],
             [{ text: 'Настроить выгрузку в CRM', callback_data: 'tools_CRM'}],
             [{ text: 'Настройка точечной рекламы', url: 'https://t.me/Peremoney_Support' }],
+            [{ text: 'Автоматическое касание', callback_data: 'tools_auto_touch' }]
         ]
     }
 
@@ -629,6 +630,7 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
                     [{ text: 'Использовать обзвон', callback_data: 'start' }],
                     [{ text: 'Использовать рассылку Telegram', callback_data: 'start' }],
                     [{ text: 'Создать инвайтинг', callback_data: 'start' }],
+                    
                 ]
             }
         });
@@ -662,5 +664,26 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
              { source: file, filename: 'company.xlsx' },
              { caption: 'Вот ваш Excel файл 📊' } 
          );
+    }
+
+    async sendAutoTouch(ctx:Context & SceneContext) {
+        await ctx.reply('Автоматическое касание', {
+            reply_markup: {
+                inline_keyboard: [
+                    [{ text: 'Включить', callback_data: 'enable_auto_touch' }],
+                    [{ text: 'Выключить', callback_data: 'disable_auto_touch' }],
+                ]
+            }
+        });
+    }
+
+    async enableAutoTouch(ctx:Context & SceneContext) {
+        await ctx.reply('Автоматическое касание включено');
+        await this.userService.enableAuto(ctx.from.id, 'auto_touch');
+    }
+
+    async disableAutoTouch(ctx:Context & SceneContext) {
+        await ctx.reply('Автоматическое касание выключено');
+        await this.userService.disableAuto(ctx.from.id, 'auto_touch');
     }
 }

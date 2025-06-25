@@ -1,17 +1,27 @@
-var formdata = new FormData();
-formdata.append("public_key", "8c7f204e5b6eb766c289b821a2a4b11c ");
-formdata.append("clip_name", "1674816625");
-formdata.append("clip_file", fileInput.files[0], "file");
-formdata.append("speaker", "your_speaker");
-formdata.append("text", "your_text");
+var axios = require('axios');
+var FormData = require('form-data');
+var fs = require('fs');
+var data = new FormData();
+data.append('public_key', 'your_public_key');
+data.append('clip_name', 'your_clip_name');
+data.append('clip_file', fs.createReadStream('/path/to/file'));
+data.append('speaker', 'your_speaker');
+data.append('text', 'your_text');
 
-var requestOptions = {
-  method: 'POST',
-  body: formdata,
-  redirect: 'follow'
+var config = {
+  method: 'post',
+maxBodyLength: Infinity,
+  url: 'https://zvonok.com/manager/cabapi_external/api/v1/audio/upload/',
+  headers: { 
+    ...data.getHeaders()
+  },
+  data : data
 };
 
-fetch("https://zvonok.com/manager/cabapi_external/api/v1/audio/upload/", requestOptions)
-  .then(response => response.text())
-  .then(result => console.log(result))
-  .catch(error => console.log('error', error));
+axios(config)
+.then(function (response) {
+  console.log(JSON.stringify(response.data));
+})
+.catch(function (error) {
+  console.log(error);
+});

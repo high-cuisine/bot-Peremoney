@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import * as FormData from 'form-data';
+import FormData from 'form-data';
+import fetch from 'node-fetch'; 
+import { https } from 'follow-redirects';
 
 @Injectable()
 export class CallsService {
@@ -22,63 +24,62 @@ export class CallsService {
     
         const res = await fetch('https://zvonok.com/manager/cabapi_external/api/v1/phones/append/calls/', {
             method: 'POST',
-            body: formData as any
+            body: formData
         });
     
         console.log(res.status, await res.text());
     
         return res;
     }
-
+    
     async createCallWithAudio(
-        audioBuffer: Buffer, 
-        fileName: string, 
-        phones: string[]
+      audioBuffer: Buffer,
+      fileName: string,
+      phones: string[]
     ): Promise<any> {
-        try {
-            const formData = new FormData();
-            formData.append("public_key", process.env.ZVONOK_PUBLIC_KEY!);
-            formData.append("clip_name", fileName);
-            
-            // Добавляем буфер как файл в FormData
-            formData.append("clip_file", audioBuffer, {
-                filename: fileName,
-                contentType: 'audio/ogg'
-            });
-            
-            formData.append("speaker", "default");
-            formData.append("text", "Audio message");
-
-            console.log('[CallsService] Uploading audio file:', {
-                fileName,
-                size: audioBuffer.length,
-                phonesCount: phones.length
-            });
-
-            const response = await fetch(
-                "https://zvonok.com/manager/cabapi_external/api/v1/audio/upload/", 
-                {
-                    method: 'POST',
-                    body: formData as any
-                }
-            );
-
-            const result = await response.text();
-            console.log('[CallsService] Audio upload response:', response.status, result);
-
-            if (!response.ok) {
-                throw new Error(`Audio upload failed: ${response.status} ${result}`);
+      return new Promise(async (resolve, reject) => {
+        const form = new FormData();
+        form.append("public_key", process.env.ZVONOK_PUBLIC_KEY!);
+        form.append("clip_name", fileName);
+        form.append("clip_file", audioBuffer, {
+          filename: fileName,
+          contentType: "audio/ogg"
+        });
+        form.append("speaker", "default");
+        form.append("text", "Audio message");
+        form.append("phones", JSON.stringify(phones));
+    
+        const headers = form.getHeaders();
+        // Опционально: зафиксировать Content-Length, чтобы сервер не обрывал «долгоиграющие» потоки
+        const length: number = await new Promise((res, rej) =>
+          form.getLength((err, len) => err ? rej(err) : res(len!))
+        );
+        headers['Content-Length'] = String(length);
+    
+        const req = https.request({
+          method: 'POST',
+          hostname: 'zvonok.com',
+          path: '/manager/cabapi_external/api/v1/audio/upload/',
+          headers,
+          maxRedirects: 20
+        }, res => {
+          const chunks: Buffer[] = [];
+          res.on('data', c => chunks.push(c));
+          res.on('end', () => {
+            const body = Buffer.concat(chunks).toString();
+            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+              resolve(this.createCallWithUploadedAudio(phones));
+            } else {
+              reject(new Error(`Upload failed: ${res.statusCode} ${body}`));
             }
-
-            // После успешной загрузки аудио, создаем кампанию обзвона
-            return await this.createCallWithUploadedAudio(phones);
-
-        } catch (error) {
-            console.error('[CallsService] Error in createCallWithAudio:', error);
-            throw error;
-        }
+          });
+        });
+    
+        req.on('error', reject);
+        form.pipe(req);
+      });
     }
-
+    
     private async createCallWithUploadedAudio(phones: string[]): Promise<any> {
         try {
             const phonesMessage = phones.join('\n');
@@ -96,7 +97,7 @@ export class CallsService {
                 'https://zvonok.com/manager/cabapi_external/api/v1/phones/append/calls/', 
                 {
                     method: 'POST',
-                    body: formData as any
+                    body: formData
                 }
             );
 

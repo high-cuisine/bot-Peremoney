@@ -39,7 +39,7 @@ export class LeadGenerationScene {
   @SceneEnter()
   async onSceneEnter(@Ctx() ctx: SceneContext) {
     await ctx.reply(BotMessages.leadGeneration.welcome);
-    await ctx.reply('Введите список сайтов каждый с новой строки:', {
+    await ctx.reply('Введите список сайтов без запятых каждый с новой строки в формате https:/:', {
       reply_markup: {
         inline_keyboard: [
           [{ text: BotMessages.leadGeneration.buttons.skip, callback_data: 'skip_sites' }]
@@ -59,7 +59,7 @@ export class LeadGenerationScene {
     session.step = 'numbers';
     session.sites = [];
     
-    await ctx.reply('Введите список номеров телефонов без запятых в столбик:', {
+    await ctx.reply('Введите список номеров телефонов без запятых каждый с новой строки в формате 7XXXX:', {
       reply_markup: {
         inline_keyboard: [
           [{ text: BotMessages.leadGeneration.buttons.skip, callback_data: 'skip_numbers' }]
@@ -94,7 +94,7 @@ export class LeadGenerationScene {
         console.log(text);
         session.sites = text;
         session.step = 'numbers';
-        await ctx.reply('Введите список номеров телефонов (каждый с новой строки):', {
+        await ctx.reply('Введите список номеров телефонов без запятых каждый с новой строки в формате 7XXXX:', {
           reply_markup: {
             inline_keyboard: [
               [{ text: BotMessages.leadGeneration.buttons.skip, callback_data: 'skip_numbers' }]
