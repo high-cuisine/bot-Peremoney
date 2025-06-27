@@ -99,7 +99,14 @@ export class AutoSettingsService {
             return;
         }
 
-        const exelBuffer = await this.exelService.exportToExcelBuffer(Array.from(new Set([...leads])));
+        const newLeads = leads.map(lead => ({
+            phone: lead.phone,
+            username: lead.username,
+            telegramId: lead.telegramId,
+            projectName: lead.company.projectName
+        }));
+
+        const exelBuffer = await this.exelService.exportToExcelBuffer(Array.from(new Set([...newLeads])));
 
         try {
             await this.botService.sendDocumentBuffer(
