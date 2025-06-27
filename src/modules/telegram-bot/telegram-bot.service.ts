@@ -31,17 +31,6 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
         setTelegramBotServiceInstance(this);
     }
 
-    // await ctx.replyWithPhoto(
-    //     { source: photoStream },
-    //     {
-    //         caption: 'Для сотрудничества с нашим сервисом, напишите в поддержку, нажав на кнопку ниже',
-    //     reply_markup: {
-    //         inline_keyboard: [
-    //             [{ text: 'Написать в поддержку', url: 'https://t.me/Peremoney_Support' }]
-    //         ]
-    //     }}
-    // );
-
     async sendBanner(ctx:Context) {
         const user = await this.userService.getUserByTelegramId(ctx.from.id);
         const isRegistered = Boolean(user);
@@ -283,17 +272,21 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
     }
 
     async sendTariffPro(ctx:Context) {
-        const price = 2990
-        await this.paymentService.createPayment(ctx.from.id, price, 'pro');
-
-
-
+        const price = 3
         const finalPrice = Math.floor(price / 179 * 100);
+        const payment = await this.paymentService.createPayment(ctx.from.id, finalPrice, 'pro');
+
+        if (!payment) {
+            await ctx.reply('Ошибка создания платежа. Попробуйте позже.');
+            return;
+        }
+
+      
 
         await ctx.sendInvoice({
             title: `Покупка тарифа pro за ${price} RUB`,
             description: `Покупка тарифа pro в боте за ${price} рублей`,
-            payload: "${payment._id}",
+            payload: `${payment.id}`,
             currency: 'XTR',
             prices: [{ label: 'XTR', amount: finalPrice }],
             provider_token: '',
@@ -603,7 +596,12 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
 
     async sendInvoice(ctx:Context, amount:number) {
 
-        await this.paymentService.createPayment(ctx.from.id, amount / 70, 'replenishment');
+        const payment = await this.paymentService.createPayment(ctx.from.id, amount / 70, 'replenishment');
+
+        if (!payment) {
+            await ctx.reply('Ошибка создания платежа. Попробуйте позже.');
+            return;
+        }
 
         const sale = await this.paymentService.findSale(ctx.from.id);
 
@@ -614,7 +612,7 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
         await ctx.sendInvoice({
             title: `Пополнение баланса на ${price} RUB`,
             description: `Пополнение баланса в боте на сумму ${price} рублей`,
-            payload: "${payment._id}",
+            payload: `${payment.id}`,
             currency: 'XTR',
             prices: [{ label: 'XTR', amount: finalPrice }],
             provider_token: '',
@@ -705,5 +703,11 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
     async disableAutoTouch(ctx:Context & SceneContext) {
         await ctx.reply('Автоматическое касание выключено');
         await this.userService.disableAuto(ctx.from.id, 'auto_touch');
+    }
+
+    async updateUserRate(ctx:Context & SceneContext) {
+        const user = await this.userService.getUserByTelegramId(ctx.from.id);
+        await this.paymentService.successPayment(user.id);
+        await ctx.reply('Оплата прошла успешно');
     }
 }

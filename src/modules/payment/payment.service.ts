@@ -20,8 +20,8 @@ export class PaymentService {
         });
 
         if (!user) {
-            console.error('User not found');
-            return;
+            console.error(`User not found for telegramId: ${telegramId}`);
+            return 70; // Возвращаем значение по умолчанию
         }
 
         const sale = await this.prisma.userSales.findFirst({
@@ -42,11 +42,13 @@ export class PaymentService {
         });
 
         if (!user) {
-            console.error('User not found');
-            return;
+            console.error(`User not found for telegramId: ${userId}`);
+            return null;
         }
 
-        const hash = await bcrypt.hash(`${userId}-${amount}-${type}`, 10);
+        console.log(`${userId}-${amount}-${type}`)
+
+        //const hash = await bcrypt.hash(`${userId}-${amount}-${type}`, 10);
 
         // First find the payment if it exists
         const existingPayment = await this.prisma.payments.findFirst({
@@ -67,17 +69,23 @@ export class PaymentService {
             });
         }
 
-        const payment = await this.prisma.payments.create({
-            data: {
-                userId: user.id,
-                amount,
-                status: 'pending',
-                Hash: hash,
-                type
-            }
-        });
+        try {
+            const payment = await this.prisma.payments.create({
+                data: {
+                    userId: user.id,
+                    amount,
+                    status: 'pending',
+                    Hash: 'hash',
+                    type
+                }
+            });
 
-        return payment;
+            console.log(`Payment created successfully: ${payment.id} for user ${userId}`);
+            return payment;
+        } catch (error) {
+            console.error(`Error creating payment for user ${userId}:`, error);
+            return null;
+        }
     }
 
     async successPayment(userId: number) {
@@ -126,10 +134,10 @@ export class PaymentService {
                 });
 
                 adminMessage = `
-                <b>Пополнение баланса</b>
-                <b>Пользователь:</b> ${user.username}
-                <b>Сумма:</b> ${payment.amount}
-                <b>Статус:</b> ${payment.status}
+                Пополнение баланса
+                Пользователь: ${user.username}
+                Сумма: ${payment.amount}
+                Статус: ${payment.status}
                 `;
                 await this.userService.updateUser(user.username, {leads: Math.floor(payment.amount / 70)})
                 break;
@@ -137,10 +145,10 @@ export class PaymentService {
             case 'pro':
                 // TODO: Implement pro subscription logic
                 adminMessage = `
-                <b>Активация PRO подписки</b>
-                <b>Пользователь:</b> ${user.username}
-                <b>Сумма:</b> ${payment.amount}
-                <b>Статус:</b> ${payment.status}
+                Активация PRO подписки
+                Пользователь: ${user.username}
+                Сумма: ${payment.amount}
+                Статус: ${payment.status}
                 `;
                 await this.userService.updateUserRate(Number(user.telegramId), 'pro')
                 break;
@@ -148,10 +156,10 @@ export class PaymentService {
             case 'premium':
                 // TODO: Implement premium subscription logic
                 adminMessage = `
-                <b>Активация PREMIUM подписки</b>
-                <b>Пользователь:</b> ${user.username}
-                <b>Сумма:</b> ${payment.amount}
-                <b>Статус:</b> ${payment.status}
+                Активация PREMIUM подписки
+                Пользователь: ${user.username}
+                Сумма: ${payment.amount}
+                Статус: ${payment.status}
                 `;
                 await this.userService.updateUserRate(Number(user.telegramId), 'pro')
                 break;

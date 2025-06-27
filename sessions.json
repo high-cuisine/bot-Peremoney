@@ -89,7 +89,7 @@
         },
         "buying_leads": {
           "step": "payment",
-          "quantity": 1
+          "quantity": 10
         },
         "load_crm": {
           "step": "type"

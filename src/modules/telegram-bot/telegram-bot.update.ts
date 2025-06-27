@@ -501,8 +501,8 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
   }
 
   @On('successful_payment')
-  async onSuccessfulPayment(@Ctx() ctx: Context, @Next() next: () => Promise<void>) {
-   
+  async onSuccessfulPayment(@Ctx() ctx: Context & SceneContext) {
+   await this.telegramBotService.updateUserRate(ctx);
   }
 
   @Action('tools_CRM')
@@ -598,6 +598,21 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
   @Action("my_companys")
   async sendUserCompanyes(@Ctx() ctx: Context) {
     await this.telegramBotService.sendCompanyes(ctx);
+  }
+
+  @Action('tools_auto_touch')
+  async onToolsAutoTouch(@Ctx() ctx: Context & SceneContext) {
+    await this.telegramBotService.sendAutoTouch(ctx);
+  }
+
+  @Action('enable_auto_touch')
+  async onEnableAutoTouch(@Ctx() ctx: Context & SceneContext) {
+    await this.telegramBotService.enableAutoTouch(ctx);
+  }
+
+  @Action('disable_auto_touch')
+  async onDisableAutoTouch(@Ctx() ctx: Context & SceneContext) {
+    await this.telegramBotService.disableAutoTouch(ctx);
   }
 
 }

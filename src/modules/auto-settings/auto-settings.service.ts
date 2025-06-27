@@ -85,6 +85,11 @@ export class AutoSettingsService {
                 phone: true,
                 username: true,
                 telegramId: true,
+                company: {
+                    select: {
+                        projectName: true,
+                    }
+                }
             }
         });
 
@@ -94,7 +99,7 @@ export class AutoSettingsService {
             return;
         }
 
-        const exelBuffer = await this.exelService.exportToExcelBuffer(leads);
+        const exelBuffer = await this.exelService.exportToExcelBuffer([new Set([...leads])]);
 
         try {
             await this.botService.sendDocumentBuffer(
