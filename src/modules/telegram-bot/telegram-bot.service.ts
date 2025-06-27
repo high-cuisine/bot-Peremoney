@@ -272,7 +272,7 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
     }
 
     async sendTariffPro(ctx:Context) {
-        const price = 3
+        const price = 2990
         const finalPrice = Math.floor(price / 179 * 100);
         const payment = await this.paymentService.createPayment(ctx.from.id, finalPrice, 'pro');
 
