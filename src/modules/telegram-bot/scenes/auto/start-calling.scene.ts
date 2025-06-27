@@ -18,6 +18,7 @@ interface StartCallingSession {
     mimeType: string;
   };
   phoneNumbers?: string[];
+  isProcessing?: boolean;
 }
 
 @Injectable()
@@ -41,6 +42,7 @@ export class StartCallingScene {
     
     const session = ctx.session['startCalling'] as StartCallingSession;
     session.step = 'instructions';
+    session.isProcessing = false;
 
     await ctx.reply(BotMessages.calling.start, {
       parse_mode: 'HTML',
@@ -188,6 +190,12 @@ export class StartCallingScene {
       await ctx.reply('Процесс обзвона отменен.');
       await ctx.scene.leave();
     } else if (callbackData === 'confirm_calling') {
+      // Проверяем, не обрабатывается ли уже запрос
+      if (session.isProcessing) {
+        console.log('[StartCalling] Request already being processed, ignoring duplicate click');
+        return;
+      }
+
       console.log('[StartCalling] Process confirmed:', {
         voiceMessageSize: session.voiceMessage?.buffer.length,
         phonesCount: session.phoneNumbers?.length
@@ -198,10 +206,11 @@ export class StartCallingScene {
           throw new Error('Missing voice message or phone numbers');
         }
 
-        // Отправляем сообщение о начале обработки
+        // Устанавливаем флаг обработки
+        session.isProcessing = true;
+
         await ctx.reply('🔄 Загружаю аудио файл на сервер...');
 
-        // Создаем обзвон с аудио
         const response = await this.callsService.createCallWithAudio(
           session.voiceMessage.buffer,
           session.voiceMessage.fileName,
@@ -222,14 +231,17 @@ export class StartCallingScene {
 
       } catch (error) {
         console.error('[StartCalling] Error creating call:', error);
-        await ctx.reply(
-          '❌ Произошла ошибка при создании заявки на обзвон.\n\n' +
-          'Возможные причины:\n' +
-          '• Неверный формат аудио файла\n' +
-          '• Проблемы с подключением к серверу\n' +
-          '• Недостаточно средств на балансе\n\n' +
-          'Пожалуйста, попробуйте позже или обратитесь в поддержку.'
-        );
+        // await ctx.reply(
+        //   '❌ Произошла ошибка при создании заявки на обзвон.\n\n' +
+        //   'Возможные причины:\n' +
+        //   '• Неверный формат аудио файла\n' +
+        //   '• Проблемы с подключением к серверу\n' +
+        //   '• Недостаточно средств на балансе\n\n' +
+        //   'Пожалуйста, попробуйте позже или обратитесь в поддержку.'
+        // );
+      } finally {
+        // Сбрасываем флаг обработки
+        session.isProcessing = false;
       }
       
       await ctx.scene.leave();
