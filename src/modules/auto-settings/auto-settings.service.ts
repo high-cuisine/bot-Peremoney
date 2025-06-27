@@ -103,7 +103,7 @@ export class AutoSettingsService {
             phone: lead.phone,
             username: lead.username,
             telegramId: lead.telegramId,
-            projectName: lead.company.projectName
+            projectName: lead.company.projectName || ''
         }));
 
         const exelBuffer = await this.exelService.exportToExcelBuffer(Array.from(new Set([...newLeads])));
