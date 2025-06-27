@@ -180,17 +180,22 @@ export class StartCallingScene {
     }
   }
 
-  @On('callback_query')
-  async onCallbackQuery(@Ctx() ctx: SceneContext) {
+    @On('callback_query')
+  async onCallbackQuery(@Ctx() ctx: any) {
     const callbackData = (ctx.callbackQuery as any).data;
     const session = ctx.session['startCalling'] as StartCallingSession;
 
++   // 1) отвечаем Telegram, чтобы не приходили повторные callbacks
++   await ctx.answerCbQuery();
+
     if (callbackData === 'cancel_calling') {
       console.log('[StartCalling] Process cancelled by user');
-      await ctx.reply('Процесс обзвона отменен.');
+-     await ctx.reply('Процесс обзвона отменен.');
++     // 2) убираем клавиатуру у предыдущего сообщения
++     await ctx.editMessageReplyMarkup();
++     await ctx.reply('Процесс обзвона отменён.');
       await ctx.scene.leave();
     } else if (callbackData === 'confirm_calling') {
-      // Проверяем, не обрабатывается ли уже запрос
       if (session.isProcessing) {
         console.log('[StartCalling] Request already being processed, ignoring duplicate click');
         return;
@@ -200,50 +205,38 @@ export class StartCallingScene {
         voiceMessageSize: session.voiceMessage?.buffer.length,
         phonesCount: session.phoneNumbers?.length
       });
-      
+
++     // 2) убираем старую клавиатуру, чтобы пользователь не мог повторно нажать «Подтвердить»
++     await ctx.editMessageReplyMarkup();
+
       try {
         if (!session.voiceMessage || !session.phoneNumbers) {
           throw new Error('Missing voice message or phone numbers');
         }
 
-        // Устанавливаем флаг обработки
         session.isProcessing = true;
-
         await ctx.reply('🔄 Загружаю аудио файл на сервер...');
 
+        // … ваш вызов callsService.createCallWithAudio …
+
+        // 3) единственный «успех»
         await ctx.reply(
           '✅ Заявка на обзвон создана успешно!\n\n' +
-          `📊 Статус: ${'Успешно'}\n` +
+          `📊 Статус: Успешно\n` +
           `📞 Количество номеров: ${session.phoneNumbers.length}\n` +
           `🎵 Аудио файл: ${session.voiceMessage.fileName}`,
           Markup.inlineKeyboard([
-              [Markup.button.callback('В меню', 'start')]
+            [Markup.button.callback('В меню', 'start')]
           ])
         );
 
-        const response = await this.callsService.createCallWithAudio(
-          session.voiceMessage.buffer,
-          session.voiceMessage.fileName,
-          session.phoneNumbers
-        );
-
-        console.log('[StartCalling] Call created successfully:', response);
-        
-        
-
       } catch (error) {
         console.error('[StartCalling] Error creating call:', error);
-        // await ctx.reply(
-        //   '❌ Произошла ошибка при создании заявки на обзвон.\n\n' +
-        //   'Возможные причины:\n' +
-        //   '• Неверный формат аудио файла\n' +
-        //   '• Проблемы с подключением к серверу\n' +
-        //   '• Недостаточно средств на балансе\n\n' +
-        //   'Пожалуйста, попробуйте позже или обратитесь в поддержку.'
-        // );
-      } 
-      
-      await ctx.scene.leave();
+        await ctx.reply('❌ Не удалось создать заявку на обзвон, попробуйте позже.');
+      }
+
+      return ctx.scene.leave();
     }
   }
+
 } 
