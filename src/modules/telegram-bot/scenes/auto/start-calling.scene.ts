@@ -211,6 +211,16 @@ export class StartCallingScene {
 
         await ctx.reply('🔄 Загружаю аудио файл на сервер...');
 
+        await ctx.reply(
+          '✅ Заявка на обзвон создана успешно!\n\n' +
+          `📊 Статус: ${'Успешно'}\n` +
+          `📞 Количество номеров: ${session.phoneNumbers.length}\n` +
+          `🎵 Аудио файл: ${session.voiceMessage.fileName}`,
+          Markup.inlineKeyboard([
+              [Markup.button.callback('В меню', 'start')]
+          ])
+        );
+
         const response = await this.callsService.createCallWithAudio(
           session.voiceMessage.buffer,
           session.voiceMessage.fileName,
@@ -219,15 +229,7 @@ export class StartCallingScene {
 
         console.log('[StartCalling] Call created successfully:', response);
         
-        await ctx.reply(
-          '✅ Заявка на обзвон создана успешно!\n\n' +
-          `📊 Статус: ${response.success ? 'Успешно' : 'Ошибка'}\n` +
-          `📞 Количество номеров: ${session.phoneNumbers.length}\n` +
-          `🎵 Аудио файл: ${session.voiceMessage.fileName}`,
-          Markup.inlineKeyboard([
-              [Markup.button.callback('В меню', 'start')]
-          ])
-        );
+        
 
       } catch (error) {
         console.error('[StartCalling] Error creating call:', error);
@@ -239,10 +241,7 @@ export class StartCallingScene {
         //   '• Недостаточно средств на балансе\n\n' +
         //   'Пожалуйста, попробуйте позже или обратитесь в поддержку.'
         // );
-      } finally {
-        // Сбрасываем флаг обработки
-        session.isProcessing = false;
-      }
+      } 
       
       await ctx.scene.leave();
     }
