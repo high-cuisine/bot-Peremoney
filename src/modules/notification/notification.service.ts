@@ -47,7 +47,7 @@ export class NotifyService {
         return this.sendUnActiveUsers();
     }
 
-    @Cron(CronExpression.EVERY_10_SECONDS, { timeZone: 'Europe/Moscow' })
+    @Cron(CronExpression.EVERY_DAY_AT_10AM, { timeZone: 'Europe/Moscow' })
     sendNewLids() {
         console.log('sendNewLids');
         return this.autoSettingsService.startUsersAutomations();
