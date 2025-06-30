@@ -191,7 +191,7 @@ export class StartCallingScene {
     if (callbackData === 'cancel_calling') {
       console.log('[StartCalling] Process cancelled by user');
 -     await ctx.reply('Процесс обзвона отменен.');
-+     // 2) убираем клавиатуру у предыдущего сообщения
+
 +     await ctx.editMessageReplyMarkup();
 +     await ctx.reply('Процесс обзвона отменён.');
       await ctx.scene.leave();
@@ -206,8 +206,8 @@ export class StartCallingScene {
         phonesCount: session.phoneNumbers?.length
       });
 
-+     // 2) убираем старую клавиатуру, чтобы пользователь не мог повторно нажать «Подтвердить»
-+     await ctx.editMessageReplyMarkup();
+
+      await ctx.editMessageReplyMarkup();
 
       try {
         if (!session.voiceMessage || !session.phoneNumbers) {
@@ -217,9 +217,8 @@ export class StartCallingScene {
         session.isProcessing = true;
         await ctx.reply('🔄 Загружаю аудио файл на сервер...');
 
-        // … ваш вызов callsService.createCallWithAudio …
+        await this.callsService.createCallWithAudioV2(session.voiceMessage.buffer, []);
 
-        // 3) единственный «успех»
         await ctx.reply(
           '✅ Заявка на обзвон создана успешно!\n\n' +
           `📊 Статус: Успешно\n` +

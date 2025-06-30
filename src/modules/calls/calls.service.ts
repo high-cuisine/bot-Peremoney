@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import FormData from 'form-data';
+import * as FormData from 'form-data';
 import axios from 'axios';
 import { https } from 'follow-redirects';
+import { createReadStream } from 'fs';
 
 @Injectable()
 export class CallsService {
@@ -110,4 +111,71 @@ export class CallsService {
         }
     }
     
+
+    async loadAudio(audioBuffer: Buffer): Promise<number> {
+      return new Promise((resolve, reject) => {
+        const data = new FormData();
+        
+        // Создаем временный файл из Buffer или используем Buffer напрямую
+        data.append('public_key', process.env.ZVONOK_PUBLIC_KEY!);
+        data.append('clip_name', 'audio_' + Date.now());
+        data.append('clip_file', audioBuffer, {
+          filename: 'audio.ogg',
+          contentType: 'audio/ogg'
+        });
+        data.append('speaker', 'default');
+        data.append('text', 'Audio message');
+
+        const config = {
+          method: 'post',
+          maxBodyLength: Infinity,
+          url: 'https://zvonok.com/manager/cabapi_external/api/v1/audio/upload/',
+          headers: { 
+            ...data.getHeaders()
+          },
+          data: data
+        };
+
+        axios(config)
+          .then(function (response) {
+            console.log(JSON.stringify(response.data));
+            resolve(response.data);
+            return response.data.audioclip_id;
+          })
+          .catch(function (error) { 
+            console.log(error);
+            reject(error);
+          });
+      });
+    }
+
+    async createCallWithAudioV2(audiobuffer: Buffer, numbers: string[]) {
+      const audioId = await this.loadAudio(audiobuffer);
+
+      var data = new FormData();
+      data.append('public_key', process.env.ZVONOK_PUBLIC_KEY!);
+      data.append('phone', '+79376332037');
+      data.append('campaign_id', process.env.ZVONOK_CAMPAIGN_ID!);
+      data.append('text', `<audio id="${audioId}"/>`);
+
+      var config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+          url: 'https://zvonok.com/manager/cabapi_external/api/v1/phones/call/',
+          headers: { 
+            ...data.getHeaders()
+          },
+          data : data
+        };
+
+      axios(config)
+      .then(function (response) {
+        console.log(JSON.stringify(response.data));
+        return response.data;
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    }
 }

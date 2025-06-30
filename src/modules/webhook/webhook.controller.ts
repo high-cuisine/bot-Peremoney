@@ -41,6 +41,12 @@ export class WebhookController {
     
     return { success: true };
   }
+
+  @Post('leads-signal')
+  async setLeadsSignal(@Body() body: any) {
+    console.log(body);
+    return { success: true };
+  }
 }
 
 
