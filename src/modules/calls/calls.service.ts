@@ -136,21 +136,29 @@ export class CallsService {
           data: data
         };
 
+        let audioId: number = 0;
+
         axios(config)
           .then(function (response) {
             console.log(JSON.stringify(response.data));
-            resolve(response.data);
-            return response.data.audioclip_id;
+            resolve(response.data.audioclip_id);
+            audioId = response.data.audioclip_id;
           })
           .catch(function (error) { 
             console.log(error);
             reject(error);
           });
       });
+
     }
 
     async createCallWithAudioV2(audiobuffer: Buffer, numbers: string[]) {
       const audioId = await this.loadAudio(audiobuffer);
+
+
+      await new Promise(resolve => setTimeout(resolve, 30000));
+      
+      console.log('[CallsService] Audio ID:', audioId);
 
       var data = new FormData();
       data.append('public_key', process.env.ZVONOK_PUBLIC_KEY!);
