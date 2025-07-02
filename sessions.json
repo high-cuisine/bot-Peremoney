@@ -55,8 +55,8 @@
           "step": "instructions"
         },
         "startMailing": {
-          "step": "instructions",
-          "message": "тест"
+          "step": "excel_file",
+          "message": "ввыывыыв"
         },
         "sms_mailing": {
           "step": "instructions"

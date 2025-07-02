@@ -453,69 +453,65 @@ export class UserBotsService {
 
 
     async createMailing(usernames: string[], message: string) {
-        let usedSessions = new Set<string>();
+        const usedSessions = new Set<string>();
         const remainingUsers = new Set(usernames);
         const attempts = new Map<string, number>();
-    
+      
         while (remainingUsers.size > 0) {
-            let sessionString = await this.redisService.srandmember("telegram:userbots");
-    
-            // Если нет новых сессий — пробуем логин вручную
-            if (!sessionString || usedSessions.has(sessionString)) {
-                sessionString = await this.login();
-                if (!sessionString) {
-                    console.log("Нет доступных аккаунтов");
-                    break;
-                }
+          let sessionString = await this.redisService.srandmember('telegram:userbots');
+      
+          if (!sessionString || usedSessions.has(sessionString)) {
+            sessionString = await this.login();
+            if (!sessionString) {
+              console.log('Нет доступных аккаунтов');
+              break;
             }
-    
-            usedSessions.add(sessionString);
-            const stringSession = new StringSession(sessionString);
-            const client = new TelegramClient(stringSession, this.apiId, this.apiHash, {
-                connectionRetries: 2,
-                useWSS: true,
-                autoReconnect: true
-            });
-    
-            try {
-                await client.connect();
-                // Отключаем получение обновлений
-                await client.invoke(new Api.updates.GetState());
-                await client.invoke(new Api.updates.GetDifference({
-                    pts: 0,
-                    date: 0,
-                    qts: 0
-                }));
-    
-                for (const username of [...remainingUsers]) {
-                    let attempt = attempts.get(username) ?? 0;
-    
-                    if (attempt >= 3) {
-                        remainingUsers.delete(username);
-                        continue;
-                    }
-    
-                    try {
-                        const user = await client.getEntity(username);
-                        await client.sendMessage(user, { message });
-    
-                        console.log(`✅ Успешно отправлено ${username}`);
-                        remainingUsers.delete(username); // убираем из списка
-                    } catch (err) {
-                        attempts.set(username, attempt + 1);
-                        console.warn(`⚠️ Ошибка при отправке ${username}, попытка ${attempt + 1}`);
-                    }
-                }
-    
-            } catch (error) {
-                console.error("❌ Ошибка при работе с аккаунтом:", error);
-            } finally {
-                await client.disconnect();
+          }
+      
+          usedSessions.add(sessionString);
+          const stringSession = new StringSession(sessionString);
+          const client = new TelegramClient(stringSession, this.apiId, this.apiHash, {
+            connectionRetries: 2,
+            useWSS: true,
+            autoReconnect: true
+          });
+      
+          try {
+            await client.connect();
+            const state = await client.invoke(new Api.updates.GetState());
+            await client.invoke(new Api.updates.GetDifference({
+              pts: state.pts,
+              date: state.date,
+              qts: state.qts
+            }));
+      
+            for (const username of Array.from(remainingUsers)) {
+              const attempt = attempts.get(username) ?? 0;
+              if (attempt >= 3) {
+                remainingUsers.delete(username);
+                continue;
+              }
+      
+              try {
+                const user = await client.getEntity(username);
+                await client.sendMessage(user, { message });
+                console.log(`✅ Успешно отправлено ${username}`);
+                remainingUsers.delete(username);
+              } catch {
+                attempts.set(username, attempt + 1);
+                console.warn(`⚠️ Ошибка при отправке ${username}, попытка ${attempt + 1}`);
+              }
             }
+          } catch (error) {
+            console.error('❌ Ошибка при работе с аккаунтом:', error);
+          } finally {
+            await client.disconnect();
+          }
         }
-    
-        console.log("📨 Рассылка завершена");
-    }
+      
+        console.log('📨 Рассылка завершена');
+      }
+      
     
 
 }

@@ -10,7 +10,7 @@ const phoneNumber = "+17017120576"; // Номер для проверки
 const findNumber = "+12098318519"
 //tutututu
 // Сохраняем сессию, чтобы не вводить код повторно
-const session = new StringSession("1AQAOMTQ5LjE1NC4xNzUuNjABuxpd2+0rmk8Bm+tO+SF53HvFXpqcEE9mSf6gUGMf3nIpYShyESabtIcr2L1ygUs3TOdPPhrR957TDw9JcVG0xw6n7RK1/sSjxTes/7KkK30PjL/G7eJBsDq+9QFa3qqwmEJw2FBnk7rzUkkytcUPDuCRpH7gNRe7cyILCoZtMGivOu7G2WPDFFZNvRngcpW05P+MGmogk6Ef/azkRGOR3oDA8yGbE30Eh22DK20KLD");
+const session = new StringSession("");
 //1BQANOTEuMTA4LjU2LjExMgG7ci69qeEAg3RdADAWEDxSc1mYHaLo0ur4PdBG6Z7mz5Z19O0O3AFOSWlGytqtGYwENpJd5WZg7fkM61+SQ7an5cV6npIELi+BCSrQbe1i1Y/adlvinG0uCt3z6qxGEjOglMaYkMexl+AquwdoyaD6ni/efHRX8s36sYdRI2yBvPry9T9R3MZxdJ6/9sZYEbyhqeC9OxOsABry0CzzTBC+7GTsAk184gPUJ/W6tffLi2OHrgZP5DSfMfuB+1x1O2b5VDazMTwG1S/khIWlRITduC82qeKUFu/aDS0X7Qc03xdAkyQz4msJLtLgJ+suKwCOJHqOlEmoskkmdd1HsR2A/w==
 (async () => {
   console.log("Подключение к Telegram...");
