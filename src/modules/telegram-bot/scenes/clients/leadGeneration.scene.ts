@@ -17,7 +17,8 @@ interface LeadGenerationSession {
   max_leads?: number
   day_leads_limit?: number
   company_name?: string
-  step: 'sites' | 'numbers' | 'company' | 'region' | 'limits' | 'daily_limits' | 'launch',
+  source_type?: 'sites' | 'numbers'
+  step: 'source_selection' | 'sites' | 'numbers' | 'company' | 'region' | 'limits' | 'daily_limits' | 'launch',
 }
 
 @Injectable()
@@ -39,27 +40,43 @@ export class LeadGenerationScene {
   @SceneEnter()
   async onSceneEnter(@Ctx() ctx: SceneContext) {
     await ctx.reply(BotMessages.leadGeneration.welcome);
-    await ctx.reply('Введите список сайтов без запятых каждый с новой строки в формате https:/:', {
+    await ctx.reply('Выберите источник для перехвата', {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Сайты конкурентов', callback_data: 'select_sites' }],
+          [{ text: 'Номера конкурентов', callback_data: 'select_numbers' }]
+        ]
+      }
+    });
+
+    ctx.session['leadGeneration'] = {
+      step: 'source_selection'
+    };
+    await addCancelButton(ctx);
+  }
+
+  @Action('select_sites')
+  async onSelectSites(@Ctx() ctx: SceneContext) {
+    const session = ctx.session['leadGeneration'] as LeadGenerationSession;
+    session.source_type = 'sites';
+    session.step = 'sites';
+    
+    await ctx.reply('Введи список сайтов (только главные страницы!) без запятых каждый с новой строки в формате https://', {
       reply_markup: {
         inline_keyboard: [
           [{ text: BotMessages.leadGeneration.buttons.skip, callback_data: 'skip_sites' }]
         ]
       }
     });
-
-    ctx.session['leadGeneration'] = {
-      step: 'sites'
-    };
-    await addCancelButton(ctx);
   }
 
-  @Action('skip_sites')
-  async onSkipSites(@Ctx() ctx: SceneContext) {
+  @Action('select_numbers')
+  async onSelectNumbers(@Ctx() ctx: SceneContext) {
     const session = ctx.session['leadGeneration'] as LeadGenerationSession;
+    session.source_type = 'numbers';
     session.step = 'numbers';
-    session.sites = [];
     
-    await ctx.reply('Введите список номеров телефонов без запятых каждый с новой строки в формате 7XXXX:', {
+    await ctx.reply('Введи список номеров телефонов без запятых каждый с новой строки в формате 7XXXX без плюса:', {
       reply_markup: {
         inline_keyboard: [
           [{ text: BotMessages.leadGeneration.buttons.skip, callback_data: 'skip_numbers' }]
@@ -68,13 +85,38 @@ export class LeadGenerationScene {
     });
   }
 
+  @Action('skip_sites')
+  async onSkipSites(@Ctx() ctx: SceneContext) {
+    const session = ctx.session['leadGeneration'] as LeadGenerationSession;
+    session.sites = [];
+    
+    if (session.source_type === 'sites') {
+      session.step = 'company';
+      await ctx.reply('Укажи название этой кампании:');
+    } else {
+      session.step = 'numbers';
+      await ctx.reply('Введите список номеров телефонов без запятых каждый с новой строки в формате 7XXXX:', {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: BotMessages.leadGeneration.buttons.skip, callback_data: 'skip_numbers' }]
+          ]
+        }
+      });
+    }
+  }
+
   @Action('skip_numbers')
   async onSkipNumbers(@Ctx() ctx: SceneContext) {
     const session = ctx.session['leadGeneration'] as LeadGenerationSession;
-    session.step = 'company';
     session.numbers = [];
     
-    await ctx.reply('Введите название вашей компании:');
+    if (session.source_type === 'numbers') {
+      session.step = 'company';
+      await ctx.reply('Укажи название этой кампании:');
+    } else {
+      session.step = 'company';
+      await ctx.reply('Укажи название этой кампании:');
+    }
   }
 
   @On('text')
@@ -93,26 +135,38 @@ export class LeadGenerationScene {
       case 'sites':
         console.log(text);
         session.sites = text;
-        session.step = 'numbers';
-        await ctx.reply('Введите список номеров телефонов без запятых каждый с новой строки в формате 7XXXX:', {
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: BotMessages.leadGeneration.buttons.skip, callback_data: 'skip_numbers' }]
-            ]
-          }
-        });
+        
+        if (session.source_type === 'sites') {
+          session.step = 'company';
+          await ctx.reply('Укажи название этой кампании:');
+        } else {
+          session.step = 'numbers';
+          await ctx.reply('Введите список номеров телефонов без запятых каждый с новой строки в формате 7XXXX:', {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: BotMessages.leadGeneration.buttons.skip, callback_data: 'skip_numbers' }]
+              ]
+            }
+          });
+        }
         break;
 
       case 'numbers':
         session.numbers = text;
-        session.step = 'company';
-        await ctx.reply('Введите название вашей компании:');
+        
+        if (session.source_type === 'numbers') {
+          session.step = 'company';
+          await ctx.reply('Укажи название этой кампании:');
+        } else {
+          session.step = 'company';
+          await ctx.reply('Укажи название этой кампании:');
+        }
         break;
 
       case 'company':
         session.company_name = text.trim();
         session.step = 'region';
-        await ctx.reply('Введите регион для перехвата лидов:');
+        await ctx.reply('Укажи регион (субъект федерации) для фильтрации по геозоне:');
         break;
 
       case 'region':
@@ -124,7 +178,7 @@ export class LeadGenerationScene {
       case 'limits':
         const maxLeads = parseInt(text);
         if (isNaN(maxLeads) || maxLeads <= 0) {
-          await ctx.reply('Пожалуйста, введите корректное число лидов (больше 0)');
+          await ctx.reply('Укажите максимальный лимит лидов для данной кампании. Убедись, что он соответствует твоему тарифу. Введи только число без пробелов и других знаков.');
           return;
         }
         session.max_leads = maxLeads;
@@ -135,7 +189,7 @@ export class LeadGenerationScene {
       case 'daily_limits':
         const dailyLimit = parseInt(text);
         if (isNaN(dailyLimit) || dailyLimit <= 0) {
-          await ctx.reply('Пожалуйста, введите корректное число для дневного лимита (больше 0)');
+          await ctx.reply('Укажи суточный лимит лидов (максимальное количество за день). Введи только число без пробелов и других знаков.');
           return;
         }
         session.day_leads_limit = dailyLimit;
@@ -198,7 +252,7 @@ export class LeadGenerationScene {
       companyName
     );
 
-    await ctx.reply('Настройки сохранены. Система будет настроена в течение 24 часов.', {
+    await ctx.reply(BotMessages.leadGeneration.success, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Обратно в меню', callback_data: 'start' }]

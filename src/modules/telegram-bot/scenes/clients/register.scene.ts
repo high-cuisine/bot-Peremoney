@@ -10,12 +10,9 @@ import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper'
 
 interface RegisterSession {
   name?: string
-  phone?: string
   niche?: string
-  marketingBudget?: string
-  cac?: string
-  ltv?: string
-  step: 'name' | 'phone' | 'niche' | 'marketingBudget' | 'cac' | 'ltv' | 'confirmation'
+  source?: string
+  step: 'name' | 'niche' | 'source'
 }
 
 @Injectable()
@@ -57,76 +54,149 @@ export class RegisterScene {
           return
         }
         session.name = text
-        session.step = 'phone'
-        await ctx.replyWithHTML('✅ Отлично! Теперь введите ваш номер телефона в формате +7XXXXXXXXXX:')
-        break
-
-      case 'phone':
-        const phoneRegex = /^\+7\d{10}$/
-        if (!phoneRegex.test(text)) {
-          await ctx.replyWithHTML(
-            '❌ Неверный формат номера телефона. Пожалуйста, используйте формат +7XXXXXXXXXX:'
-          )
-          return
-        }
-        session.phone = text
         session.step = 'niche'
-        await ctx.replyWithHTML('✅ Отлично! Какая у Вас ниша?')
+        await ctx.replyWithHTML('✅ Отлично! Какая у тебя ниша?')
         break
 
       case 'niche':
         session.niche = text
-        session.step = 'marketingBudget'
-        await ctx.replyWithHTML('✅ Отлично! Какой бюджет в месяц закладываете на маркетинг?')
-        break
-
-      case 'marketingBudget':
-        session.marketingBudget = text
-        session.step = 'cac'
-        await ctx.replyWithHTML('✅ Отлично! Какой у Вас САС (стоимость привлечения клиента)?')
-        break
-
-      case 'cac':
-        session.cac = text
-        session.step = 'ltv'
-        await ctx.replyWithHTML('✅ Отлично! Какой у Вас LTV (доход от одного клиента за всё время)?')
-        break
-
-      case 'ltv':
-        session.ltv = text
-        session.step = 'confirmation'
-
-        // Логируем все данные
-        console.log('Registration Data:', {
-          name: session.name,
-          phone: session.phone,
-          niche: session.niche,
-          marketingBudget: session.marketingBudget,
-          cac: session.cac,
-          ltv: session.ltv
-        })
-
+        session.step = 'source'
         await ctx.replyWithHTML(
-          `📝 Пожалуйста, проверьте введенные данные:\n\n` +
-          `👤 Имя: <b>${session.name}</b>\n` +
-          `📱 Телефон: <b>${session.phone}</b>\n` +
-          `🏢 Ниша: <b>${session.niche}</b>\n` +
-          `💰 Бюджет на маркетинг: <b>${session.marketingBudget}</b>\n` +
-          `💵 САС: <b>${session.cac}</b>\n` +
-          `📈 LTV: <b>${session.ltv}</b>\n\n` +
-          `Все верно?`,
+          '✅ Отлично! Откуда ты о нас узнал?',
           Markup.inlineKeyboard([
             [
-              Markup.button.callback('✅ Подтвердить', 'confirm_registration'),
-              Markup.button.callback('🔄 Начать заново', 'restart_registration')
+              Markup.button.callback('🔍 Поиск Яндекса', 'source_yandex_search'),
+              Markup.button.callback('📰 Статья на Дзене', 'source_dzen_article')
+            ],
+            [
+              Markup.button.callback('📢 Реклама в Яндексе', 'source_yandex_ads'),
+              Markup.button.callback('📱 Реклама в VK', 'source_vk_ads')
+            ],
+            [
+              Markup.button.callback('📸 Instagram', 'source_instagram'),
+              Markup.button.callback('🎵 TikTok', 'source_tiktok')
+            ],
+            [
+              Markup.button.callback('👥 От знакомых', 'source_friends'),
+              Markup.button.callback('✏️ Свой вариант', 'source_custom')
             ]
           ])
         )
         break
+
+      case 'source':
+        // Если пользователь выбрал "Свой вариант" и отправил текст
+        session.source = text
+        
+        // Логируем все данные
+        console.log('Registration Data:', {
+          name: session.name,
+          niche: session.niche,
+          source: session.source
+        })
+
+        // Сразу подтверждаем регистрацию
+        await this.confirmRegistration(ctx)
+        break
     }
   }
 
-  
+  @Action('source_yandex_search')
+  async onSourceYandexSearch(@Ctx() ctx: SceneContext) {
+    await this.handleSourceSelection(ctx, 'Поиск Яндекса')
+  }
+
+  @Action('source_dzen_article')
+  async onSourceDzenArticle(@Ctx() ctx: SceneContext) {
+    await this.handleSourceSelection(ctx, 'Статья на Дзене')
+  }
+
+  @Action('source_yandex_ads')
+  async onSourceYandexAds(@Ctx() ctx: SceneContext) {
+    await this.handleSourceSelection(ctx, 'Реклама в Яндексе')
+  }
+
+  @Action('source_vk_ads')
+  async onSourceVkAds(@Ctx() ctx: SceneContext) {
+    await this.handleSourceSelection(ctx, 'Реклама в VK')
+  }
+
+  @Action('source_instagram')
+  async onSourceInstagram(@Ctx() ctx: SceneContext) {
+    await this.handleSourceSelection(ctx, 'Instagram')
+  }
+
+  @Action('source_tiktok')
+  async onSourceTiktok(@Ctx() ctx: SceneContext) {
+    await this.handleSourceSelection(ctx, 'TikTok')
+  }
+
+  @Action('source_friends')
+  async onSourceFriends(@Ctx() ctx: SceneContext) {
+    await this.handleSourceSelection(ctx, 'От знакомых')
+  }
+
+  @Action('source_custom')
+  async onSourceCustom(@Ctx() ctx: SceneContext) {
+    if (!ctx.scene || ctx.scene.current.id !== 'register') {
+      return
+    }
+
+    const session = ctx.session['register'] as RegisterSession
+    if (!session) {
+      await ctx.scene.leave()
+      return
+    }
+
+    session.step = 'source'
+    await ctx.answerCbQuery()
+    await ctx.replyWithHTML('✏️ Пожалуйста, напишите свой вариант:')
+  }
+
+  private async handleSourceSelection(ctx: SceneContext, source: string) {
+    if (!ctx.scene || ctx.scene.current.id !== 'register') {
+      return
+    }
+
+    const session = ctx.session['register'] as RegisterSession
+    if (!session) {
+      await ctx.scene.leave()
+      return
+    }
+
+    session.source = source
+
+    // Логируем все данные
+    console.log('Registration Data:', {
+      name: session.name,
+      niche: session.niche,
+      source: session.source
+    })
+
+    await ctx.answerCbQuery()
+    
+    // Сразу подтверждаем регистрацию
+    await this.confirmRegistration(ctx)
+  }
+
+  private async confirmRegistration(ctx: SceneContext) {
+    const session = ctx.session['register'] as RegisterSession
+    
+    // Здесь должна быть логика сохранения пользователя в базу данных
+    // Пока просто отправляем сообщение об успешной регистрации
+    
+    await ctx.replyWithHTML(
+      `🎉 Поздравляем! Регистрация завершена успешно!\n\n` +
+      `👤 Имя: <b>${session.name}</b>\n` +
+      `🏢 Ниша: <b>${session.niche}</b>\n` +
+      `📋 Источник: <b>${session.source}</b>\n\n` +
+      `Добро пожаловать в нашу систему! 🚀`
+    )
+    
+    // Очищаем сессию и выходим из сцены
+    delete ctx.session['register']
+    await ctx.scene.leave()
+  }
 
   @Action('restart_registration')
   async onRestart(@Ctx() ctx: SceneContext) {

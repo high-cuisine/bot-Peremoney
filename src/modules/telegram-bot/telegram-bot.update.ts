@@ -1,5 +1,5 @@
 import { Update, Start, Hears, Ctx, Action, InjectBot, On, Next } from 'nestjs-telegraf';
-import { Context, Telegraf } from 'telegraf';
+import { Context, Markup, Telegraf } from 'telegraf';
 import { TelegramBotService } from './telegram-bot.service';
 import { RegisterScene } from './scenes/clients/register.scene';
 import { LeadGenerationScene } from './scenes/clients/leadGeneration.scene';
@@ -72,7 +72,7 @@ export class BotUpdate {
 
     await this.userService.createUser(ctx.from.id, ctx.from.username, new Date(), new Date());
 
-    await this.adminService.notifyManager(BotMessages.manager.newUser(ctx.from.username, ctx.session['register'].phone, ctx.session['register'].email));
+    await this.adminService.notifyManager(BotMessages.manager.newUser(ctx.from.username, ctx.session['register'].niche, ctx.session['register'].source));
 
     await ctx.replyWithHTML(BotMessages.register.success)
     await ctx.scene.leave()
@@ -613,6 +613,16 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
   @Action('disable_auto_touch')
   async onDisableAutoTouch(@Ctx() ctx: Context & SceneContext) {
     await this.telegramBotService.disableAutoTouch(ctx);
+  }
+
+  @Hears('Консультация с маркетологом')
+  @Action('consultation')
+  async onConsultation(@Ctx() ctx: Context & SceneContext) {
+    await ctx.reply('Ты можешь получить консультацию 60 минут в зуме с нашим маркетологом за 4900 рублей. В консультацию будут входить материалы (статистика, таблица) и конспект встречи. Для записи на консультацию нажми на кнопку ниже и напиши "хочу консультацию',
+      Markup.inlineKeyboard([
+        [{ text: 'Записаться на консультацию', url: 'https://t.me/nikolardo' }]
+      ])
+    )
   }
 
 }

@@ -25,7 +25,7 @@ export class LoadCRMScene {
   @SceneEnter()
   async registerEnter(@Ctx() ctx: SceneContext) {
     await ctx.replyWithHTML(
-        `Выберите вашу CRM систему из списка ниже`,
+        `Выбери свою CRM систему из списка ниже`,
         Markup.inlineKeyboard([
           [
             Markup.button.callback('Bitrix24', 'bitrix24'),

@@ -26,7 +26,7 @@ export class BuyingLeadsScene {
   async buyingLeadsEnter(@Ctx() ctx: SceneContext) {
     await ctx.replyWithHTML(
       '👋 Добро пожаловать в раздел покупки лидов!\n\n' +
-      'Пожалуйста, введите желаемое количество лидов:'
+      'Пожалуйста, укажи желаемое количество лидов (только число): '
     )
     await addCancelButton(ctx)
   }
@@ -70,8 +70,8 @@ export class BuyingLeadsScene {
           `Перейти к оплате?`,
           Markup.inlineKeyboard([
             [
-              { text: 'Пополнить баланс', callback_data: `top_up_balance:${price}` },
-              { text: 'Отменить заказ', callback_data: 'cancel_purchase' },
+              { text: 'Перейти к оплате', callback_data: `top_up_balance:${price}` },
+              { text: 'Отмена', callback_data: 'cancel_purchase' },
             ]
           ])
         )

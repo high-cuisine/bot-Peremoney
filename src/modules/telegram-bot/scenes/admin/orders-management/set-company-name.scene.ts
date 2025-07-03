@@ -41,7 +41,7 @@ export class SetCompanyNameScene {
         if (!ctx.scene.state['companyName']) {
             ctx.scene.state['companyName'] = message;
             await ctx.reply(
-                'Введите название компании для обзвона (или отправьте "null" если не нужно):',
+                ' Укажи название этой кампании:',
                 Markup.forceReply()
             );
             return;

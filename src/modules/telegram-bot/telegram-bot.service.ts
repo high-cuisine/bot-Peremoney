@@ -139,8 +139,8 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
     }
 
     async checkSubscription(ctx:Context) {
-        const member = await this.bot.telegram.getChatMember(CHANNEL_ID, ctx.from.id);
-        const status = ['member', 'administrator', 'creator', 'left'].includes(member.status);
+        //const member = await this.bot.telegram.getChatMember(CHANNEL_ID, ctx.from.id);
+        //const status = ['member', 'administrator', 'creator', 'left'].includes(member.status);
         const user = await this.userService.getUserByTelegramId(ctx.from.id);
 
         if(user.isTakingFreeLeads) {
@@ -149,19 +149,7 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
         }
 
 
-        if(status) {
-            
-            await this.userService.setFreeLeads(ctx.from.id);
-            await ctx.reply(BotMessages.subscription.success,
-                Markup.inlineKeyboard([
-                    [{ text: 'Обратно в меню', callback_data: 'start' }]
-                ])
-            );
-            const file = createReadStream(join(__dirname, '..', '..', 'assets/instruction.docx'));
-            await this.bot.telegram.sendDocument(ctx.from.id, { 
-                source: file, 
-                filename: 'instruction.docx'
-            });
+        if( true) {
 
             const fileMap = createReadStream(join(__dirname, '..', '..', 'assets/map.png'));
             await ctx.replyWithPhoto({ source: fileMap }, {caption: 'Как работает перехват лидов'})
@@ -201,12 +189,7 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
     }
 
     async sendInstruction(ctx: Context) {
-        const file = createReadStream(join(__dirname, '..', '..', 'assets/instruction.docx'));
-        await this.userService.setFreeLeads(ctx.from.id);
-        await this.bot.telegram.sendDocument(ctx.from.id, { 
-            source: file, 
-            filename: 'instruction.docx'
-        });
+        await ctx.reply('Инструкция: https://telegra.ph/Instrukciya-po-servisu-Peremoney-polnyj-tutorial-07-02')
     }
 
     async getMenuButtons(): Promise<InlineKeyboardButton[][]> {
@@ -217,6 +200,7 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
             [{ text: 'Перехват лидов', callback_data: 'lead_generation' }],
             [{ text: 'Инструменты', callback_data: 'tools' }],
             [{ text: 'Инструкция', callback_data: 'instruction' }],
+            [{ text: 'Консультация с маркетологом', callback_data: 'consultation' }],
             [{ text: 'Партнерская программа', callback_data: 'partner_program' }],
             [{ text: 'Реферальная программа', callback_data: 'referral_program' }],
             [{ text: 'Обновить бота', callback_data: 'start' }],
@@ -238,7 +222,7 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
             [{ text: 'Инвайтинг в Телеграм', callback_data: 'tools_inviting' }],
             [{ text: 'Настроить выгрузку в CRM', callback_data: 'tools_CRM'}],
             [{ text: 'Настройка точечной рекламы', url: 'https://t.me/Peremoney_Support' }],
-            [{ text: 'Автоматическое касание', callback_data: 'tools_auto_touch' }]
+            [{ text: 'Автоматизация касаний', callback_data: 'tools_auto_touch' }]
         ]
     }
 
@@ -356,23 +340,30 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
 
     async sendPartnerProgram(ctx:Context) {
         //@Peremoney_Support
-        const photoPath = join(__dirname, '..', '..', 'assets/inst_partner.png');
+        // const photoPath = join(__dirname, '..', '..', 'assets/inst_partner.png');
 
-        const photoStream = createReadStream(photoPath);
+        // const photoStream = createReadStream(photoPath);
 
-        const parterUrl = `https://t.me/Peremoney_Support?start=${`partner-${ctx.from.id}`}`;
+        // const parterUrl = `https://t.me/Peremoney_Support?start=${`partner-${ctx.from.id}`}`;
 
-        await ctx.replyWithPhoto(
-            { source: photoStream },
-            {
-                caption: `Для сотрудничества с нашим сервисом, напишите в поддержку, нажав на кнопку ниже \n\n  Ваша реферальная ссылка: ${parterUrl}`,
+        // await ctx.replyWithPhoto(
+        //     { source: photoStream },
+        //     {
+        //         caption: `Для сотрудничества с нашим сервисом, напишите в поддержку, нажав на кнопку ниже \n\n  Ваша реферальная ссылка: ${parterUrl}`,
+        //     reply_markup: {
+        //         inline_keyboard: [
+        //             [{ text: 'Написать в поддержку', url: parterUrl }]
+        //         ]
+        //     }}
+        // );
+
+        await ctx.reply("Твоя партнерская ссылка для приглашения клиентов: https://t.me/Peremoney_Support?start=partner-5315398537 \n\nЕсли есть вопросы или хочешь особые условия, напиши в поддержку, нажав на кнопку:", {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: 'Написать в поддержку', url: parterUrl }]
+                    [{ text: 'Написать в поддержку', url: 'https://t.me/peremoney_support' }]
                 ]
-            }}
-        );
-
+            }
+        })
     }
 
     async sendReferralProgram(ctx:Context) {
@@ -685,7 +676,7 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
     }
 
     async sendAutoTouch(ctx:Context & SceneContext) {
-        await ctx.reply('Автоматическое касание', {
+        await ctx.reply('Функция автоматизации касаний лидов:', {
             reply_markup: {
                 inline_keyboard: [
                     [{ text: 'Включить', callback_data: 'enable_auto_touch' }],
