@@ -76,7 +76,7 @@ export class PaymentService {
                     amount,
                     status: 'pending',
                     Hash: 'hash',
-                    type
+                    type: type as any
                 }
             });
 
@@ -109,7 +109,7 @@ export class PaymentService {
             data: {
                 status: 'success'
             }
-        });
+        }) as any;
 
         const user = await this.prisma.user.findUnique({
             where: {
@@ -120,7 +120,7 @@ export class PaymentService {
         let adminMessage = '';
         let businessLogic = null;
 
-        switch (payment.type) {
+        switch (payment.type as any) {
             case 'replenishment':
                 const leadsUser = payment.amount > 200000 ? payment.amount * 1.1 : payment.amount > 50000 ? payment.amount * 1.05 : payment.amount;
                 
