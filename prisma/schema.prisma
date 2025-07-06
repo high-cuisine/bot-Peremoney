@@ -14,7 +14,7 @@ model User {
   name              String    @default("")
   phone             String    @default("")
   role              UserRoles @default(user)
-  rate              UserRate  @default(default)
+  rate              UserRate  @default(free)
   lastAction        DateTime  @default(now())
   firstAction       DateTime  @default(now())
   leads             Int       @default(0)
@@ -30,7 +30,8 @@ model User {
   userSales         UserSales?
   userCRM           UserCRM?
   inviting          Inviting?
-  usersCallOrder UsersCallOrder[]
+  usersCallOrder    UsersCallOrder[]
+  partners           Partners[]
 
   @@index([telegramId])
   @@map("users")
@@ -178,7 +179,6 @@ model Partners {
   referrerId  Int
   referredId  Int
 
-  user       User   @relation(fields: [referrerId], references: [id])
   user       User   @relation(fields: [referredId], references: [id])
 }
 
@@ -189,7 +189,12 @@ enum UserRoles {
 }
 
 enum UserRate {
-  default
+  free
+  kids
+  adult
+  epic
+  space
+  beyond
   pro
 }
 
@@ -207,5 +212,4 @@ enum CRMType {
 enum PaymentType {
   replenishment
   pro
-  premium
 }

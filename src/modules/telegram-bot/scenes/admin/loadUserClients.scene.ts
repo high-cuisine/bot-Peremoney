@@ -90,7 +90,7 @@ export class LoadUserExelDeanonymization {
 
       let buffer: any;
 
-      if(user.rate === 'pro') {
+      if(user.rate !== 'free') {
         const emails = await this.adminService.sendUserExelAnonymization(session.username, [{email:'1sandefa2@gmail.com'}]);
         buffer = await this.exelSerice.exportToExcelBuffer(emails);
       }

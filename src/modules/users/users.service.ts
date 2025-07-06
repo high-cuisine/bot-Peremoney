@@ -64,7 +64,7 @@ export class UsersService {
             telegramId:telegramId,
             username:username,
             role:'user',
-            rate:'default',
+            rate:'free',
             lastAction:new Date(),
             firstAction:new Date(),
             
@@ -77,7 +77,7 @@ export class UsersService {
         return users;
     }
 
-    async updateUserRate(telegramId:number, rate:'default' | 'pro') {
+    async updateUserRate(telegramId:number, rate:'free' | 'kids' | 'adult' | 'epic' | 'space' | 'beyond') {
         const user = await this.prisma.user.update({where: {telegramId:telegramId}, data: {rate:rate}})
         return user;
     }
@@ -95,7 +95,8 @@ export class UsersService {
 
     async checkProSubscription(telegramId:number) {
         const user = await this.prisma.user.findFirst({where: {telegramId}})
-        if(user.rate === 'pro') {
+        const proRates = ['kids', 'adult', 'epic', 'space', 'beyond']
+        if(proRates.includes(user.rate)) {
             return true;
         }
         return false;

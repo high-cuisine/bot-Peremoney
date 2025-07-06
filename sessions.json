@@ -4,12 +4,6 @@
       "id": "1042650482:1042650482",
       "data": {
         "__scenes": {},
-        "register": {
-          "step": "confirmation",
-          "name": "Александр",
-          "phone": "+79658879405",
-          "email": "ewfwe@EWF.R"
-        },
         "LeadGenerationSession": {
           "step": "name"
         },
@@ -19,11 +13,11 @@
         "leadGeneration": {
           "step": "launch",
           "source_type": "sites",
-          "sites": "Https/“:/",
-          "company_name": ":",
-          "region": ":",
-          "max_leads": 1,
-          "day_leads_limit": 2
+          "sites": "jj",
+          "company_name": "j",
+          "region": "jj",
+          "max_leads": 9,
+          "day_leads_limit": 9
         },
         "sendUserExelDeAnonymization": {
           "step": "documentId",
@@ -22490,14 +22484,9 @@
     {
       "id": "7171405334:7171405334",
       "data": {
-        "__scenes": {},
-        "register": {
-          "step": "confirmation",
-          "name": "ewfwe",
-          "niche": "we",
-          "marketingBudget": "0",
-          "cac": "1",
-          "ltv": "1"
+        "__scenes": {
+          "current": "slider",
+          "state": {}
         },
         "lead_generation": {
           "step": "sites"
@@ -22516,6 +22505,30 @@
           "time_period": "1_day",
           "max_leads": 60,
           "day_leads_limit": 100
+        },
+        "buying_leads": {
+          "step": "quantity"
+        },
+        "slider": {
+          "currentIndex": 0,
+          "images": [
+            "free.png",
+            "kids.png",
+            "adult.png",
+            "epic.png",
+            "space.png",
+            "beyond.png"
+          ],
+          "captions": [
+            "🆓 <b>Бесплатный тариф</b>\n\n✅ Телефонные номера клиентов конкурентов\n❌ Деанонимизация (обогащение данных)\n❌ Промо-рассылки в Telegram\n❌ Инвайтинг в Telegram\n❌ Обзвон контактов ИИ-роботом\n❌ СМС-рассылки\n❌ Настройка точечной рекламы\n❌ Интеграция с CRM-системой\n❌ Глубокая аналитика",
+            "👶 <b>Тариф Kids</b>\n\n✅ Телефонные номера клиентов конкурентов\n✅ Промо-рассылки в Telegram\n✅ Инвайтинг в Telegram\n✅ Обзвон контактов ИИ-роботом\n✅ СМС-рассылки\n✅ Настройка точечной рекламы в Директе, VK и Telegram\n❌ Интеграция с CRM-системой\n❌ Глубокая аналитика",
+            "👨‍💼 <b>Тариф Adult</b>\n\n✅ Телефонные номера клиентов конкурентов\n✅ Промо-рассылки в Telegram\n✅ Инвайтинг в Telegram\n✅ Обзвон контактов ИИ-роботом\n✅ СМС-рассылки\n✅ Настройка точечной рекламы в Директе, VK и Telegram\n✅ Интеграция с CRM-системой\n❌ Глубокая аналитика",
+            "🚀 <b>Тариф Epic</b>\n\n✅ Телефонные номера клиентов конкурентов\n✅ Промо-рассылки в Telegram\n✅ Инвайтинг в Telegram\n✅ Обзвон контактов ИИ-роботом\n✅ СМС-рассылки\n✅ Настройка точечной рекламы в Директе, VK и Telegram\n✅ Интеграция с CRM-системой\n✅ Глубокая аналитика\n✅ Приоритетная поддержка",
+            "🌌 <b>Тариф Space</b>\n\n✅ Телефонные номера клиентов конкурентов\n✅ Промо-рассылки в Telegram\n✅ Инвайтинг в Telegram\n✅ Обзвон контактов ИИ-роботом\n✅ СМС-рассылки\n✅ Настройка точечной рекламы в Директе, VK и Telegram\n✅ Интеграция с CRM-системой\n✅ Глубокая аналитика\n✅ Приоритетная поддержка\n✅ Персональный менеджер",
+            "⭐ <b>Тариф Beyond</b>\n\n✅ Телефонные номера клиентов конкурентов\n✅ Промо-рассылки в Telegram\n✅ Инвайтинг в Telegram\n✅ Обзвон контактов ИИ-роботом\n✅ СМС-рассылки\n✅ Настройка точечной рекламы в Директе, VK и Telegram\n✅ Интеграция с CRM-системой\n✅ Глубокая аналитика\n✅ Приоритетная поддержка\n✅ Персональный менеджер\n✅ Белый лейбл"
+          ],
+          "actionButtonText": "Выбрать тариф",
+          "actionButtonCallback": "select_rate"
         }
       }
     },
@@ -22801,15 +22814,6 @@
       "id": "7260594642:7260594642",
       "data": {
         "__scenes": {},
-        "register": {
-          "step": "confirmation",
-          "name": "we",
-          "phone": "+79658874405",
-          "niche": "ewf",
-          "marketingBudget": "23",
-          "cac": "2",
-          "ltv": "2"
-        },
         "lead_generation": {
           "step": "sites"
         },
@@ -22847,6 +22851,12 @@
     },
     {
       "id": "7431282993:7535290204",
+      "data": {
+        "__scenes": {}
+      }
+    },
+    {
+      "id": "7556230265:7556230265",
       "data": {
         "__scenes": {}
       }

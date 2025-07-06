@@ -35,7 +35,7 @@ export class PaymentService {
         return sale.amount;
     }
 
-    async createPayment(userId: number, amount: number, type: 'replenishment' | 'pro' | 'premium') {
+    async createPayment(userId: number, amount: number, type: 'replenishment' | 'free' | 'kids' | 'adult' | 'epic' | 'space' | 'beyond') {
         // Check if user exists
         const user = await this.prisma.user.findUnique({
             where: { telegramId: userId }
@@ -142,7 +142,7 @@ export class PaymentService {
                 await this.userService.updateUser(user.username, {leads: Math.floor(payment.amount / 70)})
                 break;
 
-            case 'pro':
+            case 'free':
                 // TODO: Implement pro subscription logic
                 adminMessage = `
                 Активация PRO подписки
@@ -150,20 +150,58 @@ export class PaymentService {
                 Сумма: ${payment.amount}
                 Статус: ${payment.status}
                 `;
-                await this.userService.updateUserRate(Number(user.telegramId), 'pro')
+                await this.userService.updateUserRate(Number(user.telegramId), 'free')
                 break;
 
-            case 'premium':
-                // TODO: Implement premium subscription logic
+            case 'kids':
+                // TODO: Implement kids subscription logic
                 adminMessage = `
-                Активация PREMIUM подписки
+                Активация KIDS подписки
                 Пользователь: ${user.username}
                 Сумма: ${payment.amount}
                 Статус: ${payment.status}
                 `;
-                await this.userService.updateUserRate(Number(user.telegramId), 'pro')
+                await this.userService.updateUserRate(Number(user.telegramId), 'kids')
                 break;
+            
+            case 'adult':
+                // TODO: Implement adult subscription logic
+                adminMessage = `
+                Активация ADULT подписки
+                Пользователь: ${user.username}
+                Сумма: ${payment.amount}
+                Статус: ${payment.status}
+                `;
+                await this.userService.updateUserRate(Number(user.telegramId), 'adult')
+                break;  
 
+            case 'epic':
+                adminMessage = `
+                Активация EPIC подписки
+                Пользователь: ${user.username}
+                Сумма: ${payment.amount}
+                Статус: ${payment.status}
+                `;
+                await this.userService.updateUserRate(Number(user.telegramId), 'epic')
+                break;
+            case 'space':
+                adminMessage = `
+                Активация SPACE подписки
+                Пользователь: ${user.username}
+                Сумма: ${payment.amount}
+                Статус: ${payment.status}
+                `;
+                await this.userService.updateUserRate(Number(user.telegramId), 'space')
+                break;
+            case 'beyond':
+                adminMessage = `
+                Активация BEYOND подписки
+                Пользователь: ${user.username}
+                Сумма: ${payment.amount}
+                Статус: ${payment.status}
+                `;
+                await this.userService.updateUserRate(Number(user.telegramId), 'beyond')
+                break;
             default:
                 throw new Error('Unknown payment type');
         }

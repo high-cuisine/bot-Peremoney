@@ -15,6 +15,7 @@ import { AdminService } from '../admin/admin.service';
 import { PaymentService } from '../payment/payment.service';
 import { LeadsService } from '../leads/leads.service';
 import { setTelegramBotServiceInstance } from './helpers/scene.helper';
+import { rates } from './constants/rates';
   
 @Injectable()
     export class TelegramBotService {
@@ -64,7 +65,10 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
 
     async getStartBannerButtons(isRegistered:boolean, isAdmin:boolean) {
         if(!isRegistered) {
-            return [[{ text: 'Регистрация', callback_data: 'register' }]]
+            return [
+                [{ text: 'Регистрация', callback_data: 'register' }],
+                [{ text: 'Просмотр тарифов', callback_data: 'show_slider' }]
+            ]
         }
         else {
             return [... await this.getMenuButtons(), ...(await this.adminService.getAdminButton(isAdmin))]
@@ -162,7 +166,7 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
     async sendToolsMenu(ctx:Context) {
         const user = await this.userService.getUserByTelegramId(ctx.from.id);
 
-        if(user.rate === 'default') {
+        if(user.rate === 'free' as any) {
             await ctx.reply('Для использования инструментов вам необходимо иметь тариф Pro');
             return;
         }
@@ -241,7 +245,11 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
             reply_markup: {
                 inline_keyboard: [
                     [{ text: 'Пополнить баланс', callback_data: 'top_up_balance_order' }],
-                    [{ text: 'Купить подписку Pro', callback_data: 'tariff_pro' }],
+                    [{ text: 'Купить подписку Kids', callback_data: 'upgrade_rate:kids' }],
+                    [{ text: 'Купить подписку Adult', callback_data: 'upgrade_rate:adult' }],
+                    [{ text: 'Купить подписку Epic', callback_data: 'upgrade_rate:epic' }],
+                    [{ text: 'Купить подписку Space', callback_data: 'upgrade_rate:space' }],
+                    [{ text: 'Купить подписку Beyond', callback_data: 'upgrade_rate:beyond' }],
                     //[{ text: 'Купить подписку Premium', callback_data: 'tariff_premium' }],
                 ]
             }
@@ -252,13 +260,13 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
     async sendTariffMini(ctx:Context) {
         await ctx.reply('симуляция платежа и обновление тарифа');
 
-        await this.userService.updateUserRate(ctx.from.id, 'pro');
+        await this.userService.updateUserRate(ctx.from.id, 'free');
     }
 
     async sendTariffPro(ctx:Context) {
         const price = 2990
         const finalPrice = Math.floor(price / 179 * 100);
-        const payment = await this.paymentService.createPayment(ctx.from.id, finalPrice, 'pro');
+        const payment = await this.paymentService.createPayment(ctx.from.id, finalPrice, 'replenishment');
 
         if (!payment) {
             await ctx.reply('Ошибка создания платежа. Попробуйте позже.');
@@ -282,7 +290,7 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
     async sendLeadsMenu(ctx:Context) {
         const user = await this.userService.getUserByTelegramId(ctx.from.id);
 
-        if(user.rate === 'default' && user.leads === 0) {
+        if(user.rate === 'free' as any && user.leads === 0) {
             await ctx.reply(BotMessages.upload.default);
             return;
         }
@@ -700,5 +708,38 @@ import { setTelegramBotServiceInstance } from './helpers/scene.helper';
         const user = await this.userService.getUserByTelegramId(ctx.from.id);
         await this.paymentService.successPayment(user.id);
         await ctx.reply('Оплата прошла успешно');
+    }
+
+    async upgradeRate(ctx:Context, rate:'free' | 'kids' | 'adult' | 'epic' | 'space' | 'beyond') {
+        const rateObject = rates[rate as keyof typeof rates];
+        const payment = await this.paymentService.createPayment(Number(ctx.from.id), rateObject.price, rate);
+
+        if (!payment) {
+            await ctx.reply('Ошибка создания платежа. Попробуйте позже.');
+            return;
+        }
+
+        const finalPrice = Math.floor(rateObject.price / 179 * 100);
+      
+
+        await ctx.sendInvoice({
+            title: `Покупка тарифа ${rate} за ${finalPrice} RUB`,
+            description: `Покупка тарифа ${rate} в боте за ${rateObject.price} рублей`,
+            payload: `${payment.id}`,
+            currency: 'XTR',
+            prices: [{ label: 'XTR', amount: finalPrice }],
+            provider_token: '',
+        });
+    }
+
+    async startSlider(ctx: Context & SceneContext) {
+        await ctx.replyWithHTML(
+            '📊 <b>Выберите подходящий тариф</b>\n\n' +
+            'Используйте кнопки навигации для просмотра всех доступных тарифов.\n' +
+            'Каждый тариф включает различные возможности для перехвата лидов конкурентов.'
+        )
+        
+        // Переходим в сцену слайдера
+        await ctx.scene.enter('slider')
     }
 }

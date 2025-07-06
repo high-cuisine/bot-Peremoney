@@ -72,7 +72,7 @@ export class AdminService {
     async sendUserExelAnonymization(username:string, dataClients:any[]) {
         const user = await this.usersService.getUserByName(username);
         
-        if(user.rate !== 'pro') {
+        if(user.rate === 'free' as any) {
             return dataClients;
         }
 
@@ -83,7 +83,7 @@ export class AdminService {
         return deanonEmails;
     }
 
-    async notificationReplenishment(user: User, payment:number) {
+    async notificationReplenishment(user: any, payment:number) {
         const moderators = await this.usersService.getUsersByRole('moderator');
 
         if (moderators.length === 0) {
@@ -266,7 +266,7 @@ export class AdminService {
     }
 
     async changeTariff(username:string, tariff:string) {
-        await this.usersService.updateUser(username, {rate: tariff as 'default' | 'pro'});
+        await this.usersService.updateUser(username, {rate: tariff as any});
     }
 
     async acceptCallsOrder(ctx:Context & SceneContext, userId) {

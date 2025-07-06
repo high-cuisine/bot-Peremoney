@@ -32,6 +32,7 @@ import { SetCompanyNameScene } from './scenes/admin/orders-management/set-compan
 import { PaymentModule } from '../payment/payment.module';
 import { BuyingLeadsScene } from './scenes/clients/buyingLeads.scene';
 import { LoadCRMScene } from './scenes/clients/register-crm.scene';
+import { SliderScene } from './scenes/clients/slider.scene';
 import { StartCallingScene } from './scenes/auto/start-calling.scene';
 import { CallsModule } from '../calls/calls.module';
 import { LeadsModule } from '../leads/leads.module';
@@ -87,6 +88,7 @@ const session = new LocalSession()
     SetCompanyNameScene,
     BuyingLeadsScene,
     LoadCRMScene,
+    SliderScene,
     StartCallingScene,
   ],
   exports: [TelegramBotService],

@@ -101,10 +101,7 @@ export class BuyingLeadsScene {
         return;
     }
 
-    await this.adminService.notificationReplenishment({
-        ...user,
-        telegramId: Number(user.telegramId)
-    }, session.quantity);
+    await this.adminService.notificationReplenishment(user, session.quantity);
 
     await ctx.answerCbQuery()
     await ctx.replyWithHTML(

@@ -5,6 +5,7 @@ import { Markup } from 'telegraf'
 import { SceneContext } from 'telegraf/typings/scenes'
 import { BotMessages } from '../../messages/messages'
 import { addCancelButton, handleCancelButton } from '../../helpers/scene.helper'
+import { UsersService } from 'src/modules/users/users.service'
 
 //import { BotMessage, getTelegramMessage } from 'src/util/bot_messages'
 
@@ -19,6 +20,8 @@ interface RegisterSession {
 @Scene('register')
 export class RegisterScene {
   constructor(
+    private readonly usersService: UsersService,
+    private readonly adminService: AdminService 
   ) {}
 
   @SceneEnter()
@@ -192,7 +195,13 @@ export class RegisterScene {
       `📋 Источник: <b>${session.source}</b>\n\n` +
       `Добро пожаловать в нашу систему! 🚀`
     )
-    
+    const user = await this.usersService.createUser(ctx.from.id, ctx.from.username, new Date(), new Date())
+    await this.adminService.sendAdminMessage(`Пользователь ${session.name} зарегистрировался\n` +
+    `Имя: ${session.name}\n` +
+    `Ниша: ${session.niche}\n` +
+    `Источник: ${session.source}\n` +
+    `Телеграм: ${ctx.from.id}\n` +
+    `Дата регистрации: ${new Date().toLocaleString()}`)
     // Очищаем сессию и выходим из сцены
     delete ctx.session['register']
     await ctx.scene.leave()

@@ -103,6 +103,11 @@ export class BotUpdate {
     await this.telegramBotService.sendTariffPro(ctx);
   }
 
+  @Action('show_slider')
+  async onShowSlider(@Ctx() ctx: Context & SceneContext) {
+    await this.telegramBotService.startSlider(ctx);
+  }
+
   @Hears('Перехват лидов')
   @Action('lead_generation')
   async onLeadGeneration(@Ctx() ctx: Context) {
@@ -625,6 +630,36 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
     )
   }
 
+
+  @Action(/^upgrade_rate:.+$/) // Регулярное выражение для паттерна
+  async upgradeRate(@Ctx() ctx: Context) {
+
+    try {
+      // Проверка наличия данных
+      if (!ctx.callbackQuery || !('data' in ctx.callbackQuery)) {
+        throw new Error('No callback data');
+      }
+
+      // Безопасное извлечение параметров
+      const match = ctx.callbackQuery.data.match(/^upgrade_rate:(.+)$/);
+      if (!match) {
+        throw new Error('Invalid callback data format');
+      }
+
+      const [_, rate] = match as any;
+      
+      const rates = ['free', 'kids', 'adult', 'epic', 'space', 'beyond']
+      if(!rates.includes(rate)) {
+        throw new Error('Invalid rate');
+      }
+
+      await this.telegramBotService.upgradeRate(ctx, rate);
+    
+    } catch (error) {
+      console.error('Error in admin_accept_inviting:', error);
+      await ctx.answerCbQuery('Произошла ошибка').catch(console.error);
+    }
+  }
 }
 
 //:${user.id}
