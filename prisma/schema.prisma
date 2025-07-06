@@ -195,7 +195,6 @@ enum UserRate {
   epic
   space
   beyond
-  pro
 }
 
 enum PaymentsStatus {
@@ -211,5 +210,10 @@ enum CRMType {
 
 enum PaymentType {
   replenishment
-  pro
+  free
+  kids
+  adult
+  epic
+  space
+  beyond
 }

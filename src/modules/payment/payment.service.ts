@@ -76,7 +76,7 @@ export class PaymentService {
                     amount,
                     status: 'pending',
                     Hash: 'hash',
-                    type: type as any
+                    type: type as PaymentType
                 }
             });
 
