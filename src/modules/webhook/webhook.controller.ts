@@ -44,7 +44,14 @@ export class WebhookController {
 
   @Post('leads-signal')
   async setLeadsSignal(@Body() body: any) {
-    console.log(body);
+    if (!Array.isArray(body)) {
+      await this.leadsService.saveLeadsSignal(body);
+      return { success: true };
+    }
+
+    for (const item of body) {
+      await this.leadsService.saveLeadsSignal(item);
+    }
     return { success: true };
   }
 }

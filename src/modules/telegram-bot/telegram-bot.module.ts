@@ -37,6 +37,7 @@ import { StartCallingScene } from './scenes/auto/start-calling.scene';
 import { CallsModule } from '../calls/calls.module';
 import { LeadsModule } from '../leads/leads.module';
 import { AudioService } from './services/audio.service';
+import { CaruselService } from './carusel.service';
 
 const session = new LocalSession()
 
@@ -77,7 +78,8 @@ const session = new LocalSession()
     BannedGuard,
     BannedMiddleware,
     AudioService,
-
+    CaruselService,
+    
     AdminBanUserScene,
     AdminUnbanUserScene,  
     ChangeRateScene, 

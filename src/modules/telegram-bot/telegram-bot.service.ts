@@ -67,7 +67,7 @@ import { rates } from './constants/rates';
         if(!isRegistered) {
             return [
                 [{ text: 'Регистрация', callback_data: 'register' }],
-                [{ text: 'Просмотр тарифов', callback_data: 'show_slider' }]
+                [{ text: 'Просмотр тарифов', callback_data: 'tarifs' }]
             ]
         }
         else {
@@ -249,7 +249,7 @@ import { rates } from './constants/rates';
                     [{ text: 'Купить подписку Adult', callback_data: 'upgrade_rate:adult' }],
                     [{ text: 'Купить подписку Epic', callback_data: 'upgrade_rate:epic' }],
                     [{ text: 'Купить подписку Space', callback_data: 'upgrade_rate:space' }],
-                    [{ text: 'Купить подписку Beyond', callback_data: 'upgrade_rate:beyond' }],
+                    [{ text: 'Купить подписку BeyАond', callback_data: 'upgrade_rate:beyond' }],
                     //[{ text: 'Купить подписку Premium', callback_data: 'tariff_premium' }],
                 ]
             }

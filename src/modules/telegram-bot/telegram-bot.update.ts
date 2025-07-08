@@ -8,6 +8,7 @@ import { BotMessages } from './messages/messages';
 import { UsersService } from '../users/users.service';
 import { AdminService } from '../admin/admin.service';
 import { BannedMiddleware } from './middleware/banned.middleware';
+import { CaruselService } from './carusel.service';
 
 @Update()
 export class BotUpdate {
@@ -18,7 +19,8 @@ export class BotUpdate {
     private readonly userService: UsersService,
     private readonly adminService: AdminService,
     private readonly leadGenerationScene: LeadGenerationScene,
-    private readonly bannedMiddleware: BannedMiddleware
+    private readonly bannedMiddleware: BannedMiddleware,
+    private readonly caruselService: CaruselService
   ) {
     // Apply banned middleware to all updates
     this.bot.use(this.bannedMiddleware.use.bind(this.bannedMiddleware));
@@ -90,7 +92,7 @@ export class BotUpdate {
   @Hears('Подписка')
   @Action('tarifs')
   async onRates(@Ctx() ctx: Context) {
-    await this.telegramBotService.sendRates(ctx);
+    await this.caruselService.sendCarusel(ctx, 'free');
   }
 
   @Action('tariff_mini')
@@ -655,6 +657,28 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
 
       await this.telegramBotService.upgradeRate(ctx, rate);
     
+    } catch (error) {
+      console.error('Error in admin_accept_inviting:', error);
+      await ctx.answerCbQuery('Произошла ошибка').catch(console.error);
+    }
+  }
+
+  @Action(/^slider:.+$/)
+  async onSlider(@Ctx() ctx: Context & SceneContext) {
+    try {
+      // Проверка наличия данных
+      if (!ctx.callbackQuery || !('data' in ctx.callbackQuery)) {
+        throw new Error('No callback data');
+      }
+
+      // Безопасное извлечение параметров
+      const match = ctx.callbackQuery.data.match(/^slider:(.+)$/);
+      if (!match) {
+        throw new Error('Invalid callback data format');
+      }
+
+      const [_, rate] = match as any;
+      await this.caruselService.editCarusel(ctx, rate);
     } catch (error) {
       console.error('Error in admin_accept_inviting:', error);
       await ctx.answerCbQuery('Произошла ошибка').catch(console.error);
