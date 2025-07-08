@@ -48,14 +48,14 @@ export class LeadsService {
         if(!company) {
             return;
         }
-        
-        const usersInfo = await this.userBotsService.getUsersInfoByPhones([signalDTO.phone])
+
+        //const usersInfo = await this.userBotsService.getUsersInfoByPhones([signalDTO.phone])
 
         await this.prisma.usersClients.create({
             data: {
                 phone: signalDTO.phone,
-                telegramId: usersInfo[0].id || 0,
-                username: usersInfo[0].username || "",
+                telegramId: 0,
+                username: "",
                 user: {
                     connect: {
                         id: Number(company.userId)
