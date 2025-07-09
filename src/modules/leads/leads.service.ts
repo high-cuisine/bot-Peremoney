@@ -71,9 +71,12 @@ export class LeadsService {
     }
 
     async saveLeadsSignalArray(signalDTO: LeadsSignal[]) {
+
         if (!Array.isArray(signalDTO)) {
             return;
         }
+
+        console.log(12);
 
         for (const item of signalDTO) {
             await this.saveLeadsSignal(item);

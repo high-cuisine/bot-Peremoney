@@ -471,6 +471,17 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
     await ctx.scene.enter('admin_set_company_name');
   }
 
+  @Action('admin_load_leads')
+  async onAdminLoadLeads(@Ctx() ctx: Context & SceneContext) {
+    const user = await this.userService.getUserByTelegramId(ctx.from.id);
+
+    if (user?.role !== 'admin' && user?.role !== 'moderator') {
+      return;
+    }
+
+    await ctx.scene.enter('load_leads');
+  }
+
   @Action('admin_change_company_name')
   async onAdminChangeCompanyName(@Ctx() ctx: Context & SceneContext) {
     const user = await this.userService.getUserByTelegramId(ctx.from.id);
@@ -684,6 +695,7 @@ async onAdminMailingOrder(@Ctx() ctx: Context) {
       await ctx.answerCbQuery('Произошла ошибка').catch(console.error);
     }
   }
+
 }
 
 //:${user.id}

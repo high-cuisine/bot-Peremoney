@@ -22471,6 +22471,10 @@
         },
         "admin_set_calls_name": {
           "callData": null
+        },
+        "load_leads": {
+          "step": "document",
+          "username": "botmaksimka2003"
         }
       }
     },

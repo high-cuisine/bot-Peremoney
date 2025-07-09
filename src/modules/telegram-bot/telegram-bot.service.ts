@@ -509,6 +509,7 @@ import { rates } from './constants/rates';
                     [{ text: 'Просмотр всех пользователей', callback_data: 'admin_show_users' }],
                     [{ text: 'Просмотр всех заказов', callback_data: 'admin_show_orders' }],
                     [{ text: 'Задать имя компании человеку', callback_data: 'admin_set_company_name' }],
+                    [{ text: 'Загрузить лиды', callback_data: 'admin_load_leads' }],
                     
                 ]
             }

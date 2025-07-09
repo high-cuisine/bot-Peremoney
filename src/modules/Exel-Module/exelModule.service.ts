@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/core/prisma/Prisma.service';
 import * as ExcelJS from 'exceljs';
-import { PHONE_EXAMPLE, EMAIL_EXAMPLE, TELEGRAM_ID_EXAMPLE, TELEGRAM_USERNAME } from './constant/exelData'
+import { PHONE_EXAMPLE, EMAIL_EXAMPLE, TELEGRAM_ID_EXAMPLE, TELEGRAM_USERNAME, PROJECT_EXAMPLE, SOURCE_EXAMPLE, SUB2_EXAMPLE } from './constant/exelData'
 import { UsersClients } from 'generated/prisma';
+import { LeadsSignal } from 'src/modules/leads/dto/leads.dto';
 
 @Injectable()
 export class ExelService {
@@ -100,5 +101,56 @@ export class ExelService {
         console.log(res);
 
         return res;
+    }
+
+    async readLeadsSignalExcel(buffer: Buffer): Promise<LeadsSignal[]> {
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer as any);   
+    
+        const worksheet = workbook.worksheets[0];
+        const data: any[] = [];
+        worksheet.eachRow((row) => {
+            data.push(row.values);
+        });
+
+        let phoneIndex = Infinity;
+        let projectIndex = Infinity;
+        let sourceIndex = Infinity;
+        let sub2Index = Infinity;
+        
+        const leadsData: LeadsSignal[] = [];
+
+        // Определяем индексы колонок по заголовкам
+        data[0].map((exelItem, index) => {
+            if(PHONE_EXAMPLE.includes(exelItem.toLowerCase())) {
+                phoneIndex = index;
+            }
+
+            if(PROJECT_EXAMPLE.includes(exelItem.toLowerCase())) {
+                projectIndex = index;
+            }
+
+            if(SOURCE_EXAMPLE.includes(exelItem.toLowerCase())) {
+                sourceIndex = index;
+            }
+
+            if(SUB2_EXAMPLE.includes(exelItem.toLowerCase())) {
+                sub2Index = index;
+            }
+        });
+
+        // Обрабатываем данные, начиная со второй строки (пропускаем заголовки)
+        data.slice(1).map(el => {
+            const leadItem: LeadsSignal = {
+                phone: phoneIndex !== Infinity ? String(el[phoneIndex] || '') : '',
+                project: projectIndex !== Infinity ? String(el[projectIndex] || '') : '',
+                source: sourceIndex !== Infinity ? String(el[sourceIndex] || '') : '',
+                sub2: sub2Index !== Infinity ? String(el[sub2Index] || '') : ''
+            }
+
+            leadsData.push(leadItem);
+        })
+    
+        return leadsData;
     }
 }

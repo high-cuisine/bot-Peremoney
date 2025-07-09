@@ -35,6 +35,8 @@ export class NotifyService {
         });
     }
 
+    async
+
   
 
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: 'Europe/Moscow' })

@@ -10,6 +10,7 @@ import { ExelModule } from '../Exel-Module/exelModule.module';
 import { AdminModule } from '../admin/admin.module';
 import { LeadGenerationScene } from './scenes/clients/leadGeneration.scene';
 import { LoadUserExelDeanonymization } from './scenes/admin/loadUserClients.scene';
+import { LoadLeadsScene } from './scenes/admin/load-leads.scene';
 import { MailingModule } from '../mailing/mailing.module';
 import { CreateUserbotScene } from './scenes/admin/create-userbot.scene';
 import { UserBotsModule } from '../../user-bots/user-bots.module';
@@ -70,6 +71,7 @@ const session = new LocalSession()
     RegisterScene,
     LeadGenerationScene,
     LoadUserExelDeanonymization,
+    LoadLeadsScene,
     CreateUserbotScene,
     StartInvitingScene,
     StartMailingScene,
