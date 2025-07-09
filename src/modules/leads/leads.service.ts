@@ -76,8 +76,6 @@ export class LeadsService {
             return;
         }
 
-        console.log(12);
-
         for (const item of signalDTO) {
             await this.saveLeadsSignal(item);
         }
