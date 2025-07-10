@@ -200,9 +200,8 @@ export class RegisterScene {
     `Имя: ${session.name}\n` +
     `Ниша: ${session.niche}\n` +
     `Источник: ${session.source}\n` +
-    `Телеграм: ${ctx.from.id}\n` +
+    `Телеграм: ${ctx.from.username}\n` +
     `Дата регистрации: ${new Date().toLocaleString()}`)
-    // Очищаем сессию и выходим из сцены
     delete ctx.session['register']
     await ctx.scene.leave()
   }
