@@ -35,12 +35,12 @@ export class CaruselService {
                 reply_markup: {
                     inline_keyboard: [
                         [{ text: 'Бесплатный', callback_data: 'slider:free' }],
-                        [{ text: 'Купить Детский', callback_data: 'slider:kids' }],
-                        [{ text: 'Купить Взрослый', callback_data: 'slider:adult' }],
-                        [{ text: 'Купить Эпический', callback_data: 'slider:epic' }],
-                        [{ text: 'Купить Космический', callback_data: 'slider:space' }],
-                        [{ text: 'Купить Запредельный', callback_data: 'slider:beyond' }],
-                        [{ text: 'Пополнить баланс', callback_data: 'top_up_balance_order' }]
+                        [{ text: 'Детский', callback_data: 'slider:kids' }],
+                        [{ text: 'Взрослый', callback_data: 'slider:adult' }],
+                        [{ text: 'Эпический', callback_data: 'slider:epic' }],
+                        [{ text: 'Космический', callback_data: 'slider:space' }],
+                        [{ text: 'Запредельный', callback_data: 'slider:beyond' }],
+                       
                     ]
                 }
             }
@@ -75,7 +75,7 @@ export class CaruselService {
               [{ text: 'Космический', callback_data: 'slider:space' }],
               [{ text: 'Запредельный',      callback_data: 'slider:beyond' }],
 
-              [{ text: 'Пополнить баланс', callback_data: 'top_up_balance_order' }],
+             
               ...(page !== 'free' ? [[{ text: 'Купить выбранный тариф', callback_data: 'upgrade_rate:' + page }]] : [])
             ],
         };

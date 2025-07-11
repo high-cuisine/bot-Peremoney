@@ -244,11 +244,10 @@ import { rates } from './constants/rates';
             parse_mode: 'HTML',
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: 'Пополнить баланс', callback_data: 'top_up_balance_order' }],
-                    [{ text: 'Купить подписку Kids', callback_data: 'upgrade_rate:kids' }],
-                    [{ text: 'Купить подписку Adult', callback_data: 'upgrade_rate:adult' }],
-                    [{ text: 'Купить подписку Epic', callback_data: 'upgrade_rate:epic' }],
-                    [{ text: 'Купить подписку Space', callback_data: 'upgrade_rate:space' }],
+                    [{ text: 'Детский', callback_data: 'upgrade_rate:kids' }],
+                    [{ text: 'Взрослый', callback_data: 'upgrade_rate:adult' }],
+                    [{ text: 'Эпический', callback_data: 'upgrade_rate:epic' }],
+                    [{ text: 'Космический', callback_data: 'upgrade_rate:space' }],
                     [{ text: 'Купить подписку BeyАond', callback_data: 'upgrade_rate:beyond' }],
                     //[{ text: 'Купить подписку Premium', callback_data: 'tariff_premium' }],
                 ]
@@ -332,13 +331,7 @@ import { rates } from './constants/rates';
         const user = await this.userService.getUserByTelegramId(ctx.from.id) as any;
 
 
-        await ctx.reply(BotMessages.balance.getBalance(Number(user.leads)), {
-            reply_markup: {
-                inline_keyboard: [
-                    [{ text: 'Пополнить баланс', callback_data: 'top_up_balance_order' }]
-                ]
-            }
-        });
+        await ctx.reply(BotMessages.balance.getBalance(Number(user.leads)));
     }
 
     async topUpBalance(ctx:Context) {
