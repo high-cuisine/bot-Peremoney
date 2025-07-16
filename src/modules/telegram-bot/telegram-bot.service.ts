@@ -716,13 +716,23 @@ import { rates } from './constants/rates';
         const finalPrice = Math.floor(rateObject.price / 179 * 100);
       
 
-        await ctx.sendInvoice({
-            title: `Покупка тарифа ${rate} за ${finalPrice} RUB`,
-            description: `Покупка тарифа ${rate} в боте за ${rateObject.price} рублей`,
-            payload: `${payment.id}`,
-            currency: 'XTR',
-            prices: [{ label: 'XTR', amount: finalPrice }],
-            provider_token: '',
+        // await ctx.sendInvoice({
+        //     title: `Покупка тарифа ${rateObject.name} за ${finalPrice} RUB`,
+        //     description: `Покупка тарифа ${rateObject.name} в боте за ${rateObject.price} рублей`,
+        //     payload: `${payment.id}`,
+        //     currency: 'XTR',
+        //     prices: [{ label: 'XTR', amount: finalPrice }],
+        //     provider_token: '',
+        // });
+
+        await ctx.reply(`Выберите способ оплаты для тарифа ${rateObject.name}:`, {
+            reply_markup: {
+                inline_keyboard: [
+                    [{ text: 'Оплатить картой', callback_data: `pay_card:${payment.id}` }],
+                    [{ text: 'Оплатить криптовалютой', callback_data: `pay_crypto:${payment.id}` }],
+                    [{ text: 'Реквизиты для юрлиц', url: `https://t.me/Peremoney_Support` }]
+                ]
+            }
         });
     }
 

@@ -6,12 +6,14 @@ import { ratesCarusel } from './carusels/rates.carusel';
 import { join } from 'path';
 import { createReadStream } from 'fs';
 import { InputMediaPhoto } from 'telegraf/typings/core/types/typegram';
+import { UsersService } from 'src/modules/users/users.service';
 
 @Injectable()
 export class CaruselService {
     private readonly logger = new Logger(CaruselService.name);
     constructor(
-        @InjectBot() private readonly bot: Telegraf
+        @InjectBot() private readonly bot: Telegraf,
+        private readonly userService: UsersService
     ) {}
 
     async sendCarusel(ctx: Context, page:string = 'free') {
@@ -50,6 +52,7 @@ export class CaruselService {
   
     async editCarusel(ctx: Context, page: string = 'free') {
         const item = ratesCarusel.find(i => i.title === page);
+        const user = await this.userService.getUserByTelegramId(ctx.from.id);
         if (!item) {
           return ctx.answerCbQuery('Слайд не найден', { show_alert: true });
         }
@@ -76,7 +79,8 @@ export class CaruselService {
               [{ text: 'Запредельный',      callback_data: 'slider:beyond' }],
 
              
-              ...(page !== 'free' ? [[{ text: 'Купить выбранный тариф', callback_data: 'upgrade_rate:' + page }]] : [])
+              ...(page !== 'free' ? [[{ text: 'Купить выбранный тариф', callback_data: 'upgrade_rate:' + page }]] : []),
+              ...(user.rate !== 'free' ? [[{ text: 'Продлить подписку', callback_data: 'upgrade_rate:' + user.rate }]] : [])
             ],
         };
       
